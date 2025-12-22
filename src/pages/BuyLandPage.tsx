@@ -90,7 +90,6 @@ export default function BuyLandPage() {
         if (currentMap.isStyleLoaded()) {
           // 👇 projection must be set for cached styles too
           currentMap.setProjection('globe')
-          applyCustomFog(currentMap)
           addWorldLockLayer(currentMap)
           addOpenStatesOutlineLayer(currentMap)
           handleMapReady()
@@ -104,23 +103,21 @@ export default function BuyLandPage() {
 
     // Set up style.load event listener
     const styleLoadHandler = () => {
-      // 👇 projection must be set AGAIN after style reload
+      // Only set projection here
       currentMap.setProjection('globe')
+    }
+    currentMap.on('style.load', styleLoadHandler)
 
+    // Apply fog ONLY in the load handler
+    const loadHandler = () => {
+      // 🔑 projection is guaranteed active here
       applyCustomFog(currentMap)
+
       addWorldLockLayer(currentMap)
       addOpenStatesOutlineLayer(currentMap)
       handleMapReady()
     }
-    currentMap.on('style.load', styleLoadHandler)
-
-    // Also listen to 'load' event as fallback
-    const loadHandler = () => {
-      if (!isMapReadySet) {
-        handleMapReady()
-      }
-    }
-    currentMap.once('load', loadHandler)
+    currentMap.on('load', loadHandler)
 
     // Check immediately if style is already loaded (cached styles)
     // Use a small delay to allow map to initialize
@@ -233,21 +230,8 @@ export default function BuyLandPage() {
       }, 500)
     }
 
-    // Re-apply fog on tab visibility change (browsers suspend WebGL when tabs go inactive)
-    const visibilityHandler = () => {
-      if (
-        document.visibilityState === 'visible' &&
-        map.current &&
-        map.current.isStyleLoaded()
-      ) {
-        applyCustomFog(map.current)
-      }
-    }
-    document.addEventListener('visibilitychange', visibilityHandler)
-
     // Cleanup
     return () => {
-      document.removeEventListener('visibilitychange', visibilityHandler)
       window.removeEventListener('showStateAreas', handleShowStateAreas as EventListener)
       if (timeoutId) {
         clearTimeout(timeoutId)
