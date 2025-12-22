@@ -229,7 +229,11 @@ export default function BuyLandPage() {
 
     // Re-apply fog on tab visibility change (browsers suspend WebGL when tabs go inactive)
     const visibilityHandler = () => {
-      if (document.visibilityState === 'visible' && map.current) {
+      if (
+        document.visibilityState === 'visible' &&
+        map.current &&
+        map.current.isStyleLoaded()
+      ) {
         applyCustomFog(map.current)
       }
     }
@@ -274,19 +278,19 @@ export default function BuyLandPage() {
         'star-intensity': 0.35,
       } as any
 
-      // Modern API
+      // ✅ Preferred & persistent path
       if (typeof (mapInstance as any).setFog === 'function') {
         mapInstance.setFog(fogConfig)
         console.log('✨ Fog + stars applied (setFog)')
         return
       }
 
-      // Legacy fallback
+      // ✅ SAFE legacy path (NO setStyle)
       const style = mapInstance.getStyle()
       if (style) {
         style.fog = fogConfig
-        mapInstance.setStyle(style)
-        console.log('✨ Fog + stars applied (style.fog)')
+        // 🔥 DO NOT call setStyle
+        console.log('✨ Fog + stars applied (style mutation)')
       }
     } catch (err) {
       console.error('⚠️ Fog apply failed:', err)
