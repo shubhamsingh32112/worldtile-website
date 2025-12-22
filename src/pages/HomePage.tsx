@@ -1,11 +1,8 @@
-import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { userService, type UserStats } from '../services/userService'
+import { useAppBootstrap } from '../context/AppBootstrapContext'
 import GlassCard from '../components/GlassCard'
 import CityCard from '../components/CityCard'
 import SectionDivider from '../components/SectionDivider'
-import ErrorState from '../components/ErrorState'
-import LoadingSpinner from '../components/LoadingSpinner'
 import { Map, Lock } from 'lucide-react'
 
 interface City {
@@ -39,31 +36,7 @@ const TOP_CITIES: City[] = [
 
 export default function HomePage() {
   const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(true)
-  const [userStats, setUserStats] = useState<UserStats | null>(null)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-
-  useEffect(() => {
-    loadUserStats()
-  }, [])
-
-  const loadUserStats = async () => {
-    setIsLoading(true)
-    setErrorMessage(null)
-
-    try {
-      const result = await userService.getUserStats()
-      if (result.success && result.stats) {
-        setUserStats(result.stats)
-      } else {
-        setErrorMessage(result.message || 'Failed to load stats')
-      }
-    } catch (error: any) {
-      setErrorMessage(error.message || 'Error loading stats')
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const { userStats } = useAppBootstrap()
 
   const handleCityCardTap = (city: City) => {
     // Navigate to Buy Land page
@@ -85,14 +58,6 @@ export default function HomePage() {
 
   const handleInviteFriendsClick = () => {
     navigate('/earn')
-  }
-
-  if (isLoading) {
-    return (
-      <div className="py-8 px-4 md:px-6">
-        <LoadingSpinner />
-      </div>
-    )
   }
 
   return (
@@ -211,7 +176,7 @@ export default function HomePage() {
       </div>
 
       {/* Stats Section (if user has data) */}
-      {!errorMessage && userStats && userStats.landsOwned > 0 && (
+      {userStats && userStats.landsOwned > 0 && (
         <>
           <SectionDivider />
           <div className="px-5">
@@ -228,13 +193,6 @@ export default function HomePage() {
             </GlassCard>
           </div>
         </>
-      )}
-
-      {/* Error state */}
-      {errorMessage && (
-        <div className="px-5">
-          <ErrorState message={errorMessage} onRetry={loadUserStats} />
-        </div>
       )}
     </div>
   )

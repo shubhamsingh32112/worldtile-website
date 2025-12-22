@@ -1,51 +1,26 @@
-import { useEffect, useState } from 'react'
-import { referralService, type ReferralSummary } from '../services/referralService'
-import { accountService, type UserAccount } from '../services/accountService'
+import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { useReferralEarnings } from '../hooks/useReferralEarnings'
+import { useUserAccount } from '../hooks/useUserAccount'
 import { useToast } from '../context/ToastContext'
 import GlassCard from '../components/GlassCard'
 import StatCard from '../components/StatCard'
 import ErrorState from '../components/ErrorState'
-import LoadingSpinner from '../components/LoadingSpinner'
+import EarnPageSkeleton from '../components/EarnPageSkeleton'
 import { DollarSign, Users, Share2, Copy, CheckCircle } from 'lucide-react'
 
 export default function EarnPage() {
   const toast = useToast()
-  const [isLoading, setIsLoading] = useState(true)
-  const [summary, setSummary] = useState<ReferralSummary | null>(null)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [userAccount, setUserAccount] = useState<UserAccount | null>(null)
+  const queryClient = useQueryClient()
+  const { data: summary, isLoading: isLoadingEarnings, error: earningsError, refetch: refetchEarnings } = useReferralEarnings()
+  const { data: userAccount, isLoading: isLoadingAccount } = useUserAccount()
   const [copiedCode, setCopiedCode] = useState(false)
 
-  useEffect(() => {
-    loadEarnings()
-    loadUserAccount()
-  }, [])
+  const isLoading = isLoadingEarnings || isLoadingAccount
 
   const loadEarnings = async () => {
-    setIsLoading(true)
-    setErrorMessage(null)
-
-    try {
-      const result = await referralService.getReferralEarnings()
-      if (result.success && result.summary) {
-        setSummary(result.summary)
-      } else {
-        setErrorMessage(result.message || 'Failed to load earnings')
-      }
-    } catch (error: any) {
-      setErrorMessage(error.message || 'Error loading earnings')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const loadUserAccount = async () => {
-    try {
-      const account = await accountService.getMyAccount()
-      setUserAccount(account)
-    } catch (error) {
-      console.error('Error loading user account:', error)
-    }
+    await queryClient.invalidateQueries({ queryKey: ['referralEarnings'] })
+    await refetchEarnings()
   }
 
   const formatUSDT = (amount: string): string => {
@@ -95,14 +70,6 @@ export default function EarnPage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="py-8 px-4 md:px-6">
-        <LoadingSpinner />
-      </div>
-    )
-  }
-
   return (
     <div className="py-8 px-4 md:px-6">
       {/* Header */}
@@ -113,8 +80,10 @@ export default function EarnPage() {
         )}
       </div>
 
-      {errorMessage ? (
-        <ErrorState message={errorMessage} onRetry={loadEarnings} />
+      {isLoading ? (
+        <EarnPageSkeleton />
+      ) : earningsError ? (
+        <ErrorState message={earningsError.message || 'Failed to load earnings'} onRetry={loadEarnings} />
       ) : summary ? (
         <div className="space-y-5 px-4">
           {/* Total earned card */}

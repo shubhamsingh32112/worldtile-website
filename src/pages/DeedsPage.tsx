@@ -1,37 +1,20 @@
-import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { userService, type UserLand } from '../services/userService'
+import { useQueryClient } from '@tanstack/react-query'
+import { useUserLands } from '../hooks/useUserLands'
 import GlassCard from '../components/GlassCard'
 import ErrorState from '../components/ErrorState'
-import LoadingSpinner from '../components/LoadingSpinner'
+import DeedsPageSkeleton from '../components/DeedsPageSkeleton'
 import { Mountain, MapPin, Calendar, Wallet, RefreshCw } from 'lucide-react'
+import type { UserLand } from '../services/userService'
 
 export default function DeedsPage() {
   const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(true)
-  const [lands, setLands] = useState<UserLand[]>([])
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-
-  useEffect(() => {
-    loadUserLands()
-  }, [])
+  const queryClient = useQueryClient()
+  const { data: lands = [], isLoading, error, refetch } = useUserLands()
 
   const loadUserLands = async () => {
-    setIsLoading(true)
-    setErrorMessage(null)
-
-    try {
-      const result = await userService.getUserLands()
-      if (result.success && result.lands) {
-        setLands(result.lands)
-      } else {
-        setErrorMessage(result.message || 'Failed to load lands')
-      }
-    } catch (error: any) {
-      setErrorMessage(error.message || 'Error loading lands')
-    } finally {
-      setIsLoading(false)
-    }
+    await queryClient.invalidateQueries({ queryKey: ['userLands'] })
+    await refetch()
   }
 
   const formatUSDT = (amount: string): string => {
@@ -74,14 +57,6 @@ export default function DeedsPage() {
     navigate(`/deed/${landSlotId}`)
   }
 
-  if (isLoading) {
-    return (
-      <div className="py-8 px-4 md:px-6">
-        <LoadingSpinner />
-      </div>
-    )
-  }
-
   return (
     <div className="py-8 px-4 md:px-6">
       {/* Header */}
@@ -99,8 +74,10 @@ export default function DeedsPage() {
       </div>
 
       {/* Content */}
-      {errorMessage ? (
-        <ErrorState message={errorMessage} onRetry={loadUserLands} />
+      {isLoading ? (
+        <DeedsPageSkeleton />
+      ) : error ? (
+        <ErrorState message={error.message || 'Failed to load lands'} onRetry={loadUserLands} />
       ) : lands.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 px-4">
           <Mountain className="w-16 h-16 text-gray-400 mb-4" />
@@ -159,7 +136,7 @@ export default function DeedsPage() {
             </GlassCard>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }

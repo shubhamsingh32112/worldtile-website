@@ -1,21 +1,22 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { useUserAccount } from '../hooks/useUserAccount'
 import { accountService, type UserAccount } from '../services/accountService'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import GlassCard from '../components/GlassCard'
 import StatCard from '../components/StatCard'
 import ErrorState from '../components/ErrorState'
-import LoadingSpinner from '../components/LoadingSpinner'
+import AccountPageSkeleton from '../components/AccountPageSkeleton'
 import { Edit2, Check, Copy, Share2, Wallet, Lock, LogOut, Users } from 'lucide-react'
 
 export default function AccountPage() {
   const navigate = useNavigate()
   const { logout } = useAuth()
   const toast = useToast()
-  const [account, setAccount] = useState<UserAccount | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const queryClient = useQueryClient()
+  const { data: account, isLoading, error } = useUserAccount()
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false)
   const [editingName, setEditingName] = useState(false)
   const [editingPhone, setEditingPhone] = useState(false)
@@ -25,29 +26,24 @@ export default function AccountPage() {
   const [isAddingReferral, setIsAddingReferral] = useState(false)
   const [copiedReferral, setCopiedReferral] = useState(false)
 
+  // Update form values when account data loads
   useEffect(() => {
-    loadAccountData()
-  }, [])
+    if (account) {
+      setNameValue(account.name)
+      setPhoneValue(account.phoneNumber || '')
+    }
+  }, [account])
+
+  // Handle unauthorized errors
+  useEffect(() => {
+    if (error && (error as any).isUnauthorized) {
+      logout()
+      navigate('/login')
+    }
+  }, [error, logout, navigate])
 
   const loadAccountData = async () => {
-    setIsLoading(true)
-    setErrorMessage(null)
-
-    try {
-      const accountData = await accountService.getMyAccount()
-      setAccount(accountData)
-      setNameValue(accountData.name)
-      setPhoneValue(accountData.phoneNumber || '')
-    } catch (error: any) {
-      if (error.isUnauthorized) {
-        logout()
-        navigate('/login')
-        return
-      }
-      setErrorMessage(error.message || 'Failed to load account')
-    } finally {
-      setIsLoading(false)
-    }
+    await queryClient.invalidateQueries({ queryKey: ['userAccount'] })
   }
 
   const handleUpdateName = async () => {
@@ -59,7 +55,8 @@ export default function AccountPage() {
     setIsUpdatingProfile(true)
     try {
       const updated = await accountService.updateProfile({ name: nameValue.trim() })
-      setAccount(updated)
+      // Invalidate and refetch account data
+      await queryClient.invalidateQueries({ queryKey: ['userAccount'] })
       setEditingName(false)
       toast.success('Name updated successfully')
     } catch (error: any) {
@@ -85,11 +82,11 @@ export default function AccountPage() {
 
     setIsUpdatingProfile(true)
     try {
-      const updated = await accountService.updateProfile({
+      await accountService.updateProfile({
         phoneNumber: newPhone || null,
       })
-      setAccount(updated)
-      setPhoneValue(updated.phoneNumber || '')
+      // Invalidate and refetch account data
+      await queryClient.invalidateQueries({ queryKey: ['userAccount'] })
       setEditingPhone(false)
       toast.success('Phone number updated successfully')
     } catch (error: any) {
@@ -147,17 +144,13 @@ export default function AccountPage() {
 
 
   if (isLoading) {
-    return (
-      <div className="py-8 px-4 md:px-6">
-        <LoadingSpinner />
-      </div>
-    )
+    return <AccountPageSkeleton />
   }
 
-  if (errorMessage) {
+  if (error) {
     return (
       <div className="py-8 px-4 md:px-6">
-        <ErrorState message={errorMessage} onRetry={loadAccountData} />
+        <ErrorState message={(error as any).message || 'Failed to load account'} onRetry={loadAccountData} />
       </div>
     )
   }
@@ -165,7 +158,7 @@ export default function AccountPage() {
   if (!account) {
     return (
       <div className="py-8 px-4 md:px-6">
-        <ErrorState message="Account not found" />
+        <ErrorState message="Account not found" onRetry={loadAccountData} />
       </div>
     )
   }
