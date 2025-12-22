@@ -267,26 +267,26 @@ export default function BuyLandPage() {
 
       const fogConfig = {
         range: [0.8, 8.0],
-        color: 'rgba(0, 0, 0, 0)',
-        'high-color': 'rgba(0, 0, 0, 0)',
-        'horizon-blend': 0.0,
-        'space-color': 'rgba(0, 0, 0, 0)',
-        'star-intensity': 0.0,
+        color: 'rgba(20, 20, 30, 0.85)',
+        'high-color': 'rgba(10, 10, 20, 0.9)',
+        'space-color': 'rgba(5, 5, 15, 1)',
+        'horizon-blend': 0.15,
+        'star-intensity': 0.35,
       } as any
 
-      // ✅ Modern Mapbox
+      // Modern API
       if (typeof (mapInstance as any).setFog === 'function') {
         mapInstance.setFog(fogConfig)
-        console.log('✨ Fog applied via setFog()')
+        console.log('✨ Fog + stars applied (setFog)')
         return
       }
 
-      // ✅ Legacy / production-safe fallback
+      // Legacy fallback
       const style = mapInstance.getStyle()
       if (style) {
         style.fog = fogConfig
         mapInstance.setStyle(style)
-        console.log('✨ Fog applied via style.fog fallback')
+        console.log('✨ Fog + stars applied (style.fog)')
       }
     } catch (err) {
       console.error('⚠️ Fog apply failed:', err)
