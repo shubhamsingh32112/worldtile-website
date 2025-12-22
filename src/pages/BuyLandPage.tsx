@@ -60,6 +60,7 @@ export default function BuyLandPage() {
       zoom: INITIAL_ZOOM,
       maxZoom: MAX_ZOOM,
       minZoom: 0,
+      projection: 'globe', // 🔥 REQUIRED
     })
 
     const currentMap = map.current
@@ -87,6 +88,8 @@ export default function BuyLandPage() {
     const checkStyleLoaded = () => {
       try {
         if (currentMap.isStyleLoaded()) {
+          // 👇 projection must be set for cached styles too
+          currentMap.setProjection('globe')
           applyCustomFog(currentMap)
           addWorldLockLayer(currentMap)
           addOpenStatesOutlineLayer(currentMap)
@@ -101,6 +104,9 @@ export default function BuyLandPage() {
 
     // Set up style.load event listener
     const styleLoadHandler = () => {
+      // 👇 projection must be set AGAIN after style reload
+      currentMap.setProjection('globe')
+
       applyCustomFog(currentMap)
       addWorldLockLayer(currentMap)
       addOpenStatesOutlineLayer(currentMap)
@@ -266,35 +272,18 @@ export default function BuyLandPage() {
 
   // Apply custom fog/atmosphere settings (idempotent - safe to call repeatedly)
   const applyCustomFog = (mapInstance: mapboxgl.Map) => {
-    try {
-      if (!mapInstance.isStyleLoaded()) return
+    if (!mapInstance.isStyleLoaded()) return
 
-      const fogConfig = {
-        range: [0.8, 8.0],
-        color: 'rgba(20, 20, 30, 0.85)',
-        'high-color': 'rgba(10, 10, 20, 0.9)',
-        'space-color': 'rgba(5, 5, 15, 1)',
-        'horizon-blend': 0.15,
-        'star-intensity': 0.35,
-      } as any
+    const fogConfig = {
+      range: [0.8, 8.0],
+      color: 'rgba(20, 20, 30, 0.85)',
+      'high-color': 'rgba(10, 10, 20, 0.9)',
+      'space-color': 'rgba(5, 5, 15, 1)',
+      'horizon-blend': 0.15,
+      'star-intensity': 0.35,
+    } as any
 
-      // ✅ Preferred & persistent path
-      if (typeof (mapInstance as any).setFog === 'function') {
-        mapInstance.setFog(fogConfig)
-        console.log('✨ Fog + stars applied (setFog)')
-        return
-      }
-
-      // ✅ SAFE legacy path (NO setStyle)
-      const style = mapInstance.getStyle()
-      if (style) {
-        style.fog = fogConfig
-        // 🔥 DO NOT call setStyle
-        console.log('✨ Fog + stars applied (style mutation)')
-      }
-    } catch (err) {
-      console.error('⚠️ Fog apply failed:', err)
-    }
+    mapInstance.setFog?.(fogConfig)
   }
 
   // Build inverse GeoJSON (world bounds with open states as holes)
