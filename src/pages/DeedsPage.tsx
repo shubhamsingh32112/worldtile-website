@@ -136,7 +136,7 @@ export default function DeedsPage() {
             </GlassCard>
           ))}
         </div>
-      ) : null}
+      )}
     </div>
   )
 }
