@@ -22,13 +22,11 @@ export default function BuyLandPage() {
   const [hasClickedViewOpenStates, setHasClickedViewOpenStates] = useState(false)
   const [selectedStateKey, setSelectedStateKey] = useState<string | null>(null)
   const [showStateAreas, setShowStateAreas] = useState(false)
-  const hasAppliedCustomFog = useRef(false)
   const openStatesGeoJson = useRef<any>(null)
 
   useEffect(() => {
     // Reset state on mount
     setIsMapReady(false)
-    hasAppliedCustomFog.current = false
     openStatesGeoJson.current = null
 
     if (!mapContainer.current) return
@@ -78,7 +76,6 @@ export default function BuyLandPage() {
         timeoutId = null
       }
       
-      applyCustomFog(currentMap)
       if (openStatesGeoJson.current) {
         addWorldLockLayer(currentMap)
         addOpenStatesOutlineLayer(currentMap)
@@ -90,6 +87,9 @@ export default function BuyLandPage() {
     const checkStyleLoaded = () => {
       try {
         if (currentMap.isStyleLoaded()) {
+          applyCustomFog(currentMap)
+          addWorldLockLayer(currentMap)
+          addOpenStatesOutlineLayer(currentMap)
           handleMapReady()
           return true
         }
@@ -101,6 +101,9 @@ export default function BuyLandPage() {
 
     // Set up style.load event listener
     const styleLoadHandler = () => {
+      applyCustomFog(currentMap)
+      addWorldLockLayer(currentMap)
+      addOpenStatesOutlineLayer(currentMap)
       handleMapReady()
     }
     currentMap.on('style.load', styleLoadHandler)
@@ -155,6 +158,8 @@ export default function BuyLandPage() {
 
     // Enforce max zoom and check if zoomed back to default view
     const zoomHandler = () => {
+      if (currentMap.isMoving()) return
+      
       const currentZoom = currentMap.getZoom()
       
       // Enforce max zoom
@@ -179,6 +184,8 @@ export default function BuyLandPage() {
 
     // Also check on moveend (when panning/zooming completes)
     const moveEndHandler = () => {
+      if (currentMap.isMoving()) return
+      
       if (hasClickedViewOpenStates) {
         const currentZoom = currentMap.getZoom()
         const zoomDiff = Math.abs(currentZoom - INITIAL_ZOOM)
@@ -220,8 +227,17 @@ export default function BuyLandPage() {
       }, 500)
     }
 
+    // Re-apply fog on tab visibility change (browsers suspend WebGL when tabs go inactive)
+    const visibilityHandler = () => {
+      if (document.visibilityState === 'visible' && map.current) {
+        applyCustomFog(map.current)
+      }
+    }
+    document.addEventListener('visibilitychange', visibilityHandler)
+
     // Cleanup
     return () => {
+      document.removeEventListener('visibilitychange', visibilityHandler)
       window.removeEventListener('showStateAreas', handleShowStateAreas as EventListener)
       if (timeoutId) {
         clearTimeout(timeoutId)
@@ -244,40 +260,23 @@ export default function BuyLandPage() {
     }
   }, [])
 
-  // Apply custom fog/atmosphere settings
-  const applyCustomFog = async (mapInstance: mapboxgl.Map) => {
-    if (hasAppliedCustomFog.current) return
-
+  // Apply custom fog/atmosphere settings (idempotent - safe to call repeatedly)
+  const applyCustomFog = (mapInstance: mapboxgl.Map) => {
     try {
-      if (mapInstance.setFog) {
-        mapInstance.setFog({
-          range: [0.8, 8.0],
-          color: 'rgba(0, 0, 0, 0)',
-          'high-color': 'rgba(0, 0, 0, 0)',
-          'horizon-blend': 0.0,
-          'space-color': 'rgba(0, 0, 0, 0)',
-          'star-intensity': 0.0,
-        } as any)
-        hasAppliedCustomFog.current = true
-        console.log('✨ Applied custom fog and star settings')
-      } else {
-        const style = mapInstance.getStyle()
-        if (style && style.fog) {
-          style.fog = {
-            range: [0.8, 8.0],
-            color: 'rgba(0, 0, 0, 0)',
-            'high-color': 'rgba(0, 0, 0, 0)',
-            'horizon-blend': 0.0,
-            'space-color': 'rgba(0, 0, 0, 0)',
-            'star-intensity': 0.0,
-          } as any
-          mapInstance.setStyle(style)
-          hasAppliedCustomFog.current = true
-          console.log('✨ Applied custom fog and star settings (fallback)')
-        }
-      }
-    } catch (error) {
-      console.error('⚠️ Failed to apply custom fog:', error)
+      if (!mapInstance.isStyleLoaded()) return
+
+      mapInstance.setFog({
+        range: [0.8, 8.0],
+        color: 'rgba(0, 0, 0, 0)',
+        'high-color': 'rgba(0, 0, 0, 0)',
+        'horizon-blend': 0.0,
+        'space-color': 'rgba(0, 0, 0, 0)',
+        'star-intensity': 0.0,
+      } as any)
+
+      console.log('✨ Fog re-applied on style load')
+    } catch (err) {
+      console.error('⚠️ Fog apply failed:', err)
     }
   }
 
@@ -327,6 +326,7 @@ export default function BuyLandPage() {
 
   // Add world lock layer (gray fill for locked areas)
   const addWorldLockLayer = (mapInstance: mapboxgl.Map) => {
+    if (!mapInstance.isStyleLoaded()) return
     if (!openStatesGeoJson.current) return
 
     const sourceId = 'world-lock-source'
@@ -364,6 +364,7 @@ export default function BuyLandPage() {
 
   // Add open states outline layer
   const addOpenStatesOutlineLayer = (mapInstance: mapboxgl.Map) => {
+    if (!mapInstance.isStyleLoaded()) return
     if (!openStatesGeoJson.current) return
 
     const sourceId = 'open-states-source'
@@ -520,7 +521,7 @@ export default function BuyLandPage() {
         {showViewOpenStates && isMapReady && (
           <button
             onClick={handleViewOpenStates}
-            className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex items-center gap-2 px-4 py-3 bg-white/12 backdrop-blur-md rounded-full text-white font-semibold text-sm shadow-lg hover:bg-white/20 transition-all"
+            className="absolute bottom-24 md:bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex items-center gap-2 px-4 py-3 bg-white/12 backdrop-blur-md rounded-full text-white font-semibold text-sm shadow-lg hover:bg-white/20 transition-all"
             style={{
               backdropFilter: 'blur(20px)',
               boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
