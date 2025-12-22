@@ -1,6 +1,4 @@
 import GlassCard from './GlassCard'
-import StatCard from './StatCard'
-import { LogOut, Edit2 } from 'lucide-react'
 
 export default function AccountPageSkeleton() {
   return (

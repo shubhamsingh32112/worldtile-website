@@ -1,6 +1,5 @@
 import GlassCard from './GlassCard'
-import StatCard from './StatCard'
-import { DollarSign, Users } from 'lucide-react'
+import { DollarSign } from 'lucide-react'
 
 export default function EarnPageSkeleton() {
   return (

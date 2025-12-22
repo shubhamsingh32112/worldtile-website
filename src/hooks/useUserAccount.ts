@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { accountService, type UserAccount } from '../services/accountService'
+import { accountService } from '../services/accountService'
 
 export const useUserAccount = () => {
   return useQuery({

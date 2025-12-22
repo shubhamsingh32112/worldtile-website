@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { userService, type UserLand } from '../services/userService'
+import { userService } from '../services/userService'
 
 export const useUserLands = () => {
   return useQuery({

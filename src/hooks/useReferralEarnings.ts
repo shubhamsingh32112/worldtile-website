@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { referralService, type ReferralSummary } from '../services/referralService'
+import { referralService } from '../services/referralService'
 
 export const useReferralEarnings = () => {
   return useQuery({

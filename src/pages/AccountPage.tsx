@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUserAccount } from '../hooks/useUserAccount'
-import { accountService, type UserAccount } from '../services/accountService'
+import { accountService } from '../services/accountService'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import GlassCard from '../components/GlassCard'
@@ -54,7 +54,7 @@ export default function AccountPage() {
 
     setIsUpdatingProfile(true)
     try {
-      const updated = await accountService.updateProfile({ name: nameValue.trim() })
+      await accountService.updateProfile({ name: nameValue.trim() })
       // Invalidate and refetch account data
       await queryClient.invalidateQueries({ queryKey: ['userAccount'] })
       setEditingName(false)
