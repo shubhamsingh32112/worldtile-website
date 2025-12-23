@@ -21,13 +21,13 @@ export default function TopNav() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-gray-900/95 backdrop-blur-sm border-b border-gray-700 z-50">
-      <div className="max-w-full md:max-w-[1000px] mx-auto px-4 py-3">
-        <div className="flex justify-between items-center">
-          {/* Logo/Brand */}
+    <nav className="fixed top-0 left-0 right-0 h-16 bg-gray-900/95 backdrop-blur-sm border-b border-gray-700 z-50">
+      <div className="h-full max-w-full md:max-w-[1000px] mx-auto px-4">
+        <div className="h-full flex justify-center sm:justify-between items-center">
+          {/* Logo/Brand (hidden on mobile) */}
           <div 
             onClick={() => navigate('/home')}
-            className="cursor-pointer"
+            className="hidden sm:block cursor-pointer"
           >
             <h1 className="text-xl font-bold text-white">WorldTile</h1>
           </div>
