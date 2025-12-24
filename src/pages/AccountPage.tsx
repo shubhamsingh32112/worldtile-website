@@ -138,7 +138,13 @@ export default function AccountPage() {
     }
   }
 
-
+  const shareReferralCodeViaWhatsApp = (code: string) => {
+    const deepLink = `https://worldtile.app?ref=${code}`
+    const message = `🌟 Join WorldTile Metaverse!\n\nBuy virtual land and build your digital empire! 🏰\n\nUse my referral code: ${code}\n\nDownload and use code when signing up:\n${deepLink}`
+    const encodedMessage = encodeURIComponent(message)
+    const whatsappUrl = `https://wa.me/?text=${encodedMessage}`
+    window.open(whatsappUrl, '_blank')
+  }
 
   const maskAddress = (address: string): string => {
     if (address.length <= 10) return address
@@ -336,7 +342,26 @@ export default function AccountPage() {
                 <span className="text-blue-400 font-bold text-sm tracking-widest flex-1">
                   {account.referralCode}
                 </span>
-
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => shareReferralCodeViaWhatsApp(account.referralCode!)}
+                    className="p-2 hover:bg-green-500/20 rounded-lg transition-colors"
+                    title="Share on WhatsApp"
+                  >
+                    <Share2 className="w-5 h-5 text-green-400" />
+                  </button>
+                  <button
+                    onClick={() => copyReferralCode(account.referralCode!)}
+                    className="p-2 hover:bg-blue-500/20 rounded-lg transition-colors"
+                    title="Copy code"
+                  >
+                    {copiedReferral ? (
+                      <Check className="w-5 h-5 text-green-400" />
+                    ) : (
+                      <Copy className="w-5 h-5 text-blue-400" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
             <p className="text-xs text-gray-400">
