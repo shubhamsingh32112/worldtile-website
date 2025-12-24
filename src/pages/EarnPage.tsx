@@ -7,16 +7,18 @@ import GlassCard from '../components/GlassCard'
 import StatCard from '../components/StatCard'
 import ErrorState from '../components/ErrorState'
 import EarnPageSkeleton from '../components/EarnPageSkeleton'
-import { DollarSign, Users, Share2, Copy, CheckCircle } from 'lucide-react'
+import { DollarSign, Users, Share2, Copy, CheckCircle, MapPin } from 'lucide-react'
 
 export default function EarnPage() {
   const toast = useToast()
   const queryClient = useQueryClient()
-  const { data: summary, isLoading: isLoadingEarnings, error: earningsError, refetch: refetchEarnings } = useReferralEarnings()
+  const { data: earningsData, isLoading: isLoadingEarnings, error: earningsError, refetch: refetchEarnings } = useReferralEarnings()
   const { data: userAccount, isLoading: isLoadingAccount } = useUserAccount()
   const [copiedCode, setCopiedCode] = useState(false)
 
   const isLoading = isLoadingEarnings || isLoadingAccount
+  const summary = earningsData?.summary
+  const propertiesSold = earningsData?.propertiesSold || []
 
   const loadEarnings = async () => {
     await queryClient.invalidateQueries({ queryKey: ['referralEarnings'] })
@@ -70,6 +72,15 @@ export default function EarnPage() {
     }
   }
 
+  // Calculate total lands sold
+  const totalLandsSold = propertiesSold.reduce((total, property) => {
+    return total + (property.slots?.length || 0)
+  }, 0)
+
+  // Calculate total value (lands sold * 110 USDT per land)
+  const LAND_PRICE_USDT = 110
+  const totalLandsValue = totalLandsSold * LAND_PRICE_USDT
+
   return (
     <div className="mx-auto w-full max-w-[1000px] px-4 md:px-6">
       {/* Header */}
@@ -109,14 +120,21 @@ export default function EarnPage() {
             Withdraw Earnings
           </button>
 
-          {/* Stats card */}
-          <StatCard
-            title="Active Referrals"
-            value={`${summary.totalReferrals || 0}`}
-            icon={Users}
-            color="text-purple-400"
-            fullWidth
-          />
+          {/* Stats cards */}
+          <div className="grid grid-cols-2 gap-3">
+            <StatCard
+              title="Active Referrals"
+              value={`${summary.totalReferrals || 0}`}
+              icon={Users}
+              color="text-purple-400"
+            />
+            <StatCard
+              title="Total Lands Sold"
+              value={`${formatUSDT(totalLandsValue.toString())} USDT`}
+              icon={MapPin}
+              color="text-blue-400"
+            />
+          </div>
 
           {/* Referral Code Card */}
           {userAccount?.referralCode && (

@@ -50,6 +50,7 @@ export default function HeroText() {
         font-inter
         text-[#D6D6D6]
         drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)]
+        pt-24 md:pt-32
       "
     >
       <h1

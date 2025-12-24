@@ -1,11 +1,10 @@
 import { useNavigate } from 'react-router-dom'
-import { useAppBootstrap } from '../context/AppBootstrapContext'
 import GlassCard from '../components/GlassCard'
 import CityCard from '../components/CityCard'
 import SectionDivider from '../components/SectionDivider'
 import GlobeHero from '../components/GlobeHero'
 import LightRays from '../components/LightRays'
-import { Map, Lock } from 'lucide-react'
+import { Lock } from 'lucide-react'
 
 interface City {
   name: string
@@ -25,6 +24,8 @@ const getCityImagePath = (cityName: string): string => {
       return '/images/pune.jpeg'
     case 'jaipur':
       return '/images/jaipur.jpeg'
+    case 'delhi':
+      return '/images/delhi.jpeg'
     default:
       return ''
   }
@@ -34,11 +35,11 @@ const TOP_CITIES: City[] = [
   { name: 'Bangalore', change: '+12.5%', price: '110 USDT', isPositive: true, stateKey: 'karnataka', imagePath: getCityImagePath('Bangalore') },
   { name: 'Pune', change: '+8.3%', price: '110 USDT', isPositive: true, stateKey: 'maharashtra', imagePath: getCityImagePath('Pune') },
   { name: 'Jaipur', change: '+7%', price: '110 USDT', isPositive: true, stateKey: 'rajasthan', imagePath: getCityImagePath('Jaipur') },
+  { name: 'Delhi', change: '+14%', price: '110 USDT', isPositive: true, stateKey: 'NCTofDelhi', imagePath: getCityImagePath('Delhi') },
 ]
 
 export default function HomePage() {
   const navigate = useNavigate()
-  const { userStats } = useAppBootstrap()
 
   const handleCityCardTap = (city: City) => {
     // Navigate to Buy Land page
@@ -94,6 +95,8 @@ export default function HomePage() {
         <div className="mx-auto w-full max-w-[1000px] px-4 md:px-6">
           {/* Hero Section */}
           <div id="home-hero-section" className="mb-4">
+          <div className="sm:hidden">
+
             <GlassCard padding="p-4" backgroundColor="bg-white/2">
               <div className="flex items-center gap-3">
                 {/* Left - Text */}
@@ -130,6 +133,7 @@ export default function HomePage() {
                 </div>
               </div>
             </GlassCard>
+            </div>
           </div>
 
       <SectionDivider />
@@ -164,20 +168,21 @@ export default function HomePage() {
             <Lock className="w-5 h-5 text-gray-400" />
           </div>
           
-          {/* Grid/Map visual */}
-          <div className="h-[200px] rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/15 relative overflow-hidden">
-            {/* Grid pattern */}
-            <div className="absolute inset-0" style={{
-              backgroundImage: `
-                linear-gradient(to right, rgba(59, 130, 246, 0.1) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(59, 130, 246, 0.1) 1px, transparent 1px)
-              `,
-              backgroundSize: '20px 20px',
-            }} />
-            
-            {/* Overlay content */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <Lock className="w-16 h-16 text-gray-400" />
+          {/* Markets image */}
+          <div className="h-[200px] md:h-[300px] lg:h-[350px] rounded-2xl relative overflow-hidden bg-gradient-to-br from-blue-500/20 to-purple-500/15">
+            <img
+              src="/images/markets.jpeg"
+              alt="Markets to Invest In"
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                // Hide image on error, fallback gradient will show
+                const target = e.currentTarget as HTMLImageElement
+                target.style.display = 'none'
+              }}
+            />
+            {/* Opacity overlay */}
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+              <Lock className="w-16 h-16 md:w-20 md:h-20 text-gray-300 opacity-80" />
             </div>
           </div>
         </GlassCard>
@@ -204,26 +209,6 @@ export default function HomePage() {
           </div>
         </GlassCard>
       </div>
-
-      {/* Stats Section (if user has data) */}
-      {userStats && userStats.landsOwned > 0 && (
-        <>
-          <SectionDivider />
-          <div>
-            <GlassCard padding="p-6" backgroundColor="bg-white/3">
-              <div className="flex items-center gap-5">
-                <div className="w-16 h-16 rounded-2xl bg-blue-500/20 flex items-center justify-center">
-                  <Map className="w-8 h-8 text-blue-500" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-gray-400 text-sm mb-1">Lands Owned</p>
-                  <p className="text-3xl font-bold text-blue-500">{userStats.landsOwned}</p>
-                </div>
-              </div>
-            </GlassCard>
-          </div>
-        </>
-      )}
         </div>
       </div>
     </>

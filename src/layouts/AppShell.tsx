@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from 'react-router-dom'
 import TopNav from '../components/TopNav'
+import Footer from '../components/Footer'
 
 export default function AppShell() {
   const location = useLocation()
@@ -20,6 +21,9 @@ export default function AppShell() {
       <main className={`flex-1 w-full relative z-10 ${noPadding ? '' : 'pt-24'}`}>
         <Outlet />
       </main>
+      
+      {/* Footer */}
+      <Footer />
     </div>
   )
 }

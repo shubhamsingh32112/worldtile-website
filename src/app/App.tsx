@@ -4,6 +4,7 @@ import { AuthProvider } from '../context/AuthContext'
 import { AppBootstrapProvider } from '../context/AppBootstrapContext'
 import { ToastProvider } from '../context/ToastContext'
 import AppRouter from '../router'
+import InitialLoader from '../components/InitialLoader'
 
 // Create a client with default options for caching
 const queryClient = new QueryClient({
@@ -19,17 +20,20 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <AppBootstrapProvider>
-            <ToastProvider>
-              <AppRouter />
-            </ToastProvider>
-          </AppBootstrapProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+    <>
+      <InitialLoader />
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <AppBootstrapProvider>
+              <ToastProvider>
+                <AppRouter />
+              </ToastProvider>
+            </AppBootstrapProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </BrowserRouter>
+    </>
   )
 }
 

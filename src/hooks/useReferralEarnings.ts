@@ -7,7 +7,10 @@ export const useReferralEarnings = () => {
     queryFn: async () => {
       const result = await referralService.getReferralEarnings()
       if (result.success && result.summary) {
-        return result.summary
+        return {
+          summary: result.summary,
+          propertiesSold: result.propertiesSold || [],
+        }
       }
       throw new Error(result.message || 'Failed to fetch referral earnings')
     },

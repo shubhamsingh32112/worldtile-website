@@ -24,6 +24,17 @@ export default {
           xl: '1000px',
         },
       },
+      keyframes: {
+        loaderGlow: {
+          '0%': { transform: 'translateX(0)', opacity: '0' },
+          '10%': { opacity: '1' },
+          '90%': { opacity: '1' },
+          '100%': { transform: 'translateX(180%)', opacity: '0' },
+        },
+      },
+      animation: {
+        'loader-glow': 'loaderGlow 2.2s ease-in-out forwards',
+      },
     },
   },
   plugins: [],

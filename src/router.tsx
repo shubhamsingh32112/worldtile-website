@@ -11,7 +11,13 @@ import EarnPage from './pages/EarnPage'
 import PaymentPage from './pages/PaymentPage'
 import AreaDetailsPage from './pages/AreaDetailsPage'
 import AccountPage from './pages/AccountPage'
+import PrivacyPolicy from './pages/PrivacyPolicy'
 import LoadingSpinner from './components/LoadingSpinner'
+import RefundPolicy from './pages/refundPolicy'
+import TermsAndConditions from './pages/terms_and_condition'
+import AgentProgram from './pages/AgentProgram'
+import Support from './pages/Support'
+import ContactUs from './pages/ContactUs'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
@@ -35,23 +41,75 @@ function AppRouter() {
       <Route path="/login" element={user ? <Navigate to="/home" replace /> : <LoginPage />} />
       <Route path="/signup" element={user ? <Navigate to="/home" replace /> : <SignupPage />} />
       
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <AppShell />
-          </ProtectedRoute>
-        }
-      >
+      {/* All routes use AppShell, but only some require authentication */}
+      <Route path="/" element={<AppShell />}>
         <Route index element={<Navigate to="/home" replace />} />
+        {/* Public routes - no authentication required */}
         <Route path="home" element={<HomePage />} />
-        <Route path="buy-land" element={<BuyLandPage />} />
-        <Route path="area/:areaKey" element={<AreaDetailsPage />} />
-        <Route path="deeds" element={<DeedsPage />} />
-        <Route path="deed/:propertyId" element={<DeedDetailPage />} />
-        <Route path="earn" element={<EarnPage />} />
-        <Route path="account" element={<AccountPage />} />
-        <Route path="payment/:orderId" element={<PaymentPage />} />
+        <Route path="privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="refund-policy" element={<RefundPolicy />} />
+        <Route path="terms-and-condition" element={<TermsAndConditions />} />
+        <Route path="become-an-agent" element={<AgentProgram />} />
+        <Route path="support" element={<Support />} />
+        <Route path="contact-us" element={<ContactUs />} />
+        
+        {/* Protected routes - require authentication */}
+        <Route
+          path="buy-land"
+          element={
+            <ProtectedRoute>
+              <BuyLandPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="area/:areaKey"
+          element={
+            <ProtectedRoute>
+              <AreaDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="deeds"
+          element={
+            <ProtectedRoute>
+              <DeedsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="deed/:propertyId"
+          element={
+            <ProtectedRoute>
+              <DeedDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="earn"
+          element={
+            <ProtectedRoute>
+              <EarnPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="account"
+          element={
+            <ProtectedRoute>
+              <AccountPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="payment/:orderId"
+          element={
+            <ProtectedRoute>
+              <PaymentPage />
+            </ProtectedRoute>
+          }
+        />
       </Route>
     </Routes>
   )

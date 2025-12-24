@@ -22,6 +22,8 @@ export default function AccountPage() {
   const [editingPhone, setEditingPhone] = useState(false)
   const [nameValue, setNameValue] = useState('')
   const [phoneValue, setPhoneValue] = useState('')
+  const [originalName, setOriginalName] = useState('')
+  const [originalPhone, setOriginalPhone] = useState('')
   const [referralCode, setReferralCode] = useState('')
   const [isAddingReferral, setIsAddingReferral] = useState(false)
   const [copiedReferral, setCopiedReferral] = useState(false)
@@ -31,6 +33,8 @@ export default function AccountPage() {
     if (account) {
       setNameValue(account.name)
       setPhoneValue(account.phoneNumber || '')
+      setOriginalName(account.name)
+      setOriginalPhone(account.phoneNumber || '')
     }
   }, [account])
 
@@ -47,7 +51,7 @@ export default function AccountPage() {
   }
 
   const handleUpdateName = async () => {
-    if (!account || nameValue.trim() === account.name) {
+    if (!account || nameValue.trim() === originalName) {
       setEditingName(false)
       return
     }
@@ -57,10 +61,13 @@ export default function AccountPage() {
       await accountService.updateProfile({ name: nameValue.trim() })
       // Invalidate and refetch account data
       await queryClient.invalidateQueries({ queryKey: ['userAccount'] })
+      setOriginalName(nameValue.trim())
       setEditingName(false)
       toast.success('Name updated successfully')
     } catch (error: any) {
       toast.error(error.message || 'Failed to update name')
+      // Revert to original value on error
+      setNameValue(originalName)
     } finally {
       setIsUpdatingProfile(false)
     }
@@ -73,7 +80,7 @@ export default function AccountPage() {
     }
 
     const newPhone = phoneValue.trim()
-    const oldPhone = account.phoneNumber || ''
+    const oldPhone = originalPhone || ''
 
     if (newPhone === oldPhone) {
       setEditingPhone(false)
@@ -87,10 +94,13 @@ export default function AccountPage() {
       })
       // Invalidate and refetch account data
       await queryClient.invalidateQueries({ queryKey: ['userAccount'] })
+      setOriginalPhone(newPhone)
       setEditingPhone(false)
       toast.success('Phone number updated successfully')
     } catch (error: any) {
       toast.error(error.message || 'Failed to update phone')
+      // Revert to original value on error
+      setPhoneValue(originalPhone)
     } finally {
       setIsUpdatingProfile(false)
     }
@@ -214,17 +224,21 @@ export default function AccountPage() {
               <input
                 type="text"
                 value={nameValue}
-                onChange={(e) => setNameValue(e.target.value)}
+                onChange={(e) => {
+                  setNameValue(e.target.value)
+                  setEditingName(true)
+                }}
                 onBlur={handleUpdateName}
-                disabled={!editingName || isUpdatingProfile}
-                className="flex-1 bg-white/8 border border-white/20 rounded-xl px-4 py-3 text-white disabled:opacity-50"
-                onFocus={() => setEditingName(true)}
+                disabled={isUpdatingProfile}
+                className="flex-1 bg-white/90 border border-white/20 rounded-xl px-4 py-3 text-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50"
+                placeholder="Enter your name"
               />
-              {editingName && (
+              {editingName && nameValue.trim() !== originalName && (
                 <button
                   onClick={handleUpdateName}
                   disabled={isUpdatingProfile}
                   className="p-2 hover:bg-green-500/20 rounded-lg transition-colors"
+                  title="Save changes"
                 >
                   {isUpdatingProfile ? (
                     <div className="w-5 h-5 border-2 border-green-400 border-t-transparent rounded-full animate-spin" />
@@ -254,18 +268,21 @@ export default function AccountPage() {
               <input
                 type="tel"
                 value={phoneValue}
-                onChange={(e) => setPhoneValue(e.target.value)}
+                onChange={(e) => {
+                  setPhoneValue(e.target.value)
+                  setEditingPhone(true)
+                }}
                 onBlur={handleUpdatePhone}
-                disabled={!editingPhone || isUpdatingProfile}
+                disabled={isUpdatingProfile}
                 placeholder="+1234567890"
-                className="flex-1 bg-white/8 border border-white/20 rounded-xl px-4 py-3 text-white disabled:opacity-50"
-                onFocus={() => setEditingPhone(true)}
+                className="flex-1 bg-white/90 border border-white/20 rounded-xl px-4 py-3 text-black placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 disabled:opacity-50"
               />
-              {editingPhone && (
+              {editingPhone && phoneValue.trim() !== originalPhone && (
                 <button
                   onClick={handleUpdatePhone}
                   disabled={isUpdatingProfile}
                   className="p-2 hover:bg-green-500/20 rounded-lg transition-colors"
+                  title="Save changes"
                 >
                   {isUpdatingProfile ? (
                     <div className="w-5 h-5 border-2 border-green-400 border-t-transparent rounded-full animate-spin" />

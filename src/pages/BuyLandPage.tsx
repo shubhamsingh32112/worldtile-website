@@ -484,12 +484,28 @@ export default function BuyLandPage() {
     })
   }
 
+  // Handle zoom in
+  const handleZoomIn = () => {
+    if (!map.current) return
+    const currentZoom = map.current.getZoom()
+    const newZoom = Math.min(currentZoom + 0.5, MAX_ZOOM)
+    map.current.zoomTo(newZoom, { duration: 200 })
+  }
+
+  // Handle zoom out
+  const handleZoomOut = () => {
+    if (!map.current) return
+    const currentZoom = map.current.getZoom()
+    const newZoom = Math.max(currentZoom - 0.5, 0)
+    map.current.zoomTo(newZoom, { duration: 200 })
+  }
+
   return (
     <>
       <div
         className="absolute left-0 right-0 w-screen"
         style={{
-          height: 'calc(100vh - 64px)',
+          height: '100vh',
           marginLeft: 'calc(-50vw + 50%)',
           marginRight: 'calc(-50vw + 50%)',
         }}
@@ -503,6 +519,29 @@ export default function BuyLandPage() {
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
               <p className="text-gray-400">Loading world map...</p>
+            </div>
+          </div>
+        )}
+
+        {/* Zoom control button */}
+        {isMapReady && (
+          <div className="absolute bottom-1 left-1 z-20">
+            <div className="bg-black rounded-[20px] flex items-center overflow-hidden shadow-lg">
+              <button
+                onClick={handleZoomOut}
+                className="px-4 py-2 text-white hover:bg-gray-800 transition-colors text-lg font-medium"
+                aria-label="Zoom out"
+              >
+                −
+              </button>
+              <div className="w-px h-6 bg-gray-600"></div>
+              <button
+                onClick={handleZoomIn}
+                className="px-4 py-2 text-white hover:bg-gray-800 transition-colors text-lg font-medium"
+                aria-label="Zoom in"
+              >
+                +
+              </button>
             </div>
           </div>
         )}

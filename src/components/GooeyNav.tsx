@@ -100,7 +100,8 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
   };
   const handleClick = (e: React.MouseEvent<HTMLElement>, index: number) => {
     const liEl = e.currentTarget;
-    if (activeIndex === index) return;
+    // Always allow click handler to be called, even if it's the active item
+    // This allows navigation to work even when clicking the same route
     
     // Update internal state if external activeIndex is not provided
     if (externalActiveIndex === undefined) {
@@ -112,13 +113,16 @@ const GooeyNav: React.FC<GooeyNavProps> = ({
       onItemClick(index);
     }
     
-    updateEffectPosition(liEl);
-    if (filterRef.current) {
-      const particles = filterRef.current.querySelectorAll('.particle');
-      particles.forEach(p => filterRef.current!.removeChild(p));
-    }
-    if (filterRef.current) {
-      makeParticles(filterRef.current);
+    // Only show animation if it's a different item
+    if (activeIndex !== index) {
+      updateEffectPosition(liEl);
+      if (filterRef.current) {
+        const particles = filterRef.current.querySelectorAll('.particle');
+        particles.forEach(p => filterRef.current!.removeChild(p));
+      }
+      if (filterRef.current) {
+        makeParticles(filterRef.current);
+      }
     }
   };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>, index: number) => {
