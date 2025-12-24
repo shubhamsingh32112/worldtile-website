@@ -6,10 +6,9 @@ import { accountService } from '../services/accountService'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import GlassCard from '../components/GlassCard'
-import StatCard from '../components/StatCard'
 import ErrorState from '../components/ErrorState'
 import AccountPageSkeleton from '../components/AccountPageSkeleton'
-import { Edit2, Check, Copy, Share2, Wallet, Lock, LogOut, Users } from 'lucide-react'
+import { Check, Copy, Share2, Wallet, Lock, LogOut } from 'lucide-react'
 
 export default function AccountPage() {
   const navigate = useNavigate()
@@ -191,29 +190,21 @@ export default function AccountPage() {
         <GlassCard padding="p-6">
           {/* Avatar */}
           <div className="flex justify-center mb-6">
-            <div className="relative">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 border-2 border-white/30 flex items-center justify-center">
-                {account.photoUrl ? (
-                  <img
-                    src={account.photoUrl}
-                    alt={account.name}
-                    className="w-full h-full rounded-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none'
-                    }}
-                  />
-                ) : (
-                  <span className="text-3xl font-bold text-white">
-                    {account.initials}
-                  </span>
-                )}
-              </div>
-              <button
-                className="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 rounded-full border-2 border-white flex items-center justify-center hover:bg-blue-700 transition-colors"
-                title="Edit photo (coming soon)"
-              >
-                <Edit2 className="w-4 h-4 text-white" />
-              </button>
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 border-2 border-white/30 flex items-center justify-center">
+              {account.photoUrl ? (
+                <img
+                  src={account.photoUrl}
+                  alt={account.name}
+                  className="w-full h-full rounded-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                  }}
+                />
+              ) : (
+                <span className="text-3xl font-bold text-white">
+                  {account.initials}
+                </span>
+              )}
             </div>
           </div>
 
@@ -304,39 +295,23 @@ export default function AccountPage() {
           </div>
         </GlassCard>
 
-        {/* Agent Stats */}
-        <div className="grid grid-cols-2 gap-3">
-          <StatCard
-            title="Earnings"
-            value={`${account.earningsAsDouble.toFixed(2)} USDT`}
-            icon={Wallet}
-            color="text-green-400"
-          />
-          <StatCard
-            title="Referrals"
-            value={`${account.referralStats.totalReferrals}`}
-            icon={Users}
-            color="text-purple-400"
-          />
-        </div>
-
         {/* Referral Code Section (if not referred) */}
         {!account.isReferred && (
           <GlassCard padding="p-5">
             <h3 className="text-lg font-bold text-white mb-4">Enter Referral Code</h3>
-            <div className="flex gap-2 mb-3">
+            <div className="flex flex-col sm:flex-row gap-2 mb-3">
               <input
                 type="text"
                 value={referralCode}
                 onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
                 placeholder="Enter referral code"
-                className="flex-1 bg-white/8 border border-white/20 rounded-xl px-4 py-3 text-black uppercase placeholder:text-gray-500"
+                className="flex-1 bg-white/8 border border-white/20 rounded-xl px-4 py-3 text-black uppercase placeholder:text-gray-500 min-w-0"
                 maxLength={10}
               />
               <button
                 onClick={handleAddReferralCode}
                 disabled={isAddingReferral || !referralCode.trim()}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors"
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors whitespace-nowrap sm:w-auto w-full"
               >
                 {isAddingReferral ? '...' : 'Apply'}
               </button>
