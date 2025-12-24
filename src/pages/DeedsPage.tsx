@@ -58,7 +58,7 @@ export default function DeedsPage() {
   }
 
   return (
-    <div className="py-8 px-4 md:px-6">
+    <div className="mx-auto w-full max-w-[1000px] px-4 md:px-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-4 px-4">
         <h1 className="text-2xl font-bold text-white">Your Deeds</h1>

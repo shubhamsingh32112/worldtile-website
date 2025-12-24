@@ -3,6 +3,8 @@ import { useAppBootstrap } from '../context/AppBootstrapContext'
 import GlassCard from '../components/GlassCard'
 import CityCard from '../components/CityCard'
 import SectionDivider from '../components/SectionDivider'
+import GlobeHero from '../components/GlobeHero'
+import LightRays from '../components/LightRays'
 import { Map, Lock } from 'lucide-react'
 
 interface City {
@@ -61,53 +63,81 @@ export default function HomePage() {
   }
 
   return (
-    <div className="py-8 px-4 md:px-6">
-      {/* Hero Section */}
-      <div className="mx-5 mb-4">
-        <GlassCard padding="p-4" backgroundColor="bg-white/2">
-          <div className="flex items-center gap-3">
-            {/* Left - Text */}
-            <div className="flex-1">
-              <h2 className="text-2xl font-semibold text-white mb-1.5 leading-tight">
-                Build & Trade in<br />the Metaverse
-              </h2>
-              <p className="text-xs text-gray-400 mb-4 leading-relaxed">
-                Invest in virtual properties and earn USDT rewards
-              </p>
-              <button
-                onClick={handleBuyLandClick}
-                className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-colors"
-              >
-                Buy Land
-              </button>
-            </div>
-            
-            {/* Right - Hero Image */}
-            <div className="flex-shrink-0 w-32 h-32 rounded-2xl overflow-hidden">
-              <img
-                src="/images/herosection.png"
-                alt="Metaverse"
-                className="w-full h-full object-contain"
-                onError={(e) => {
-                  // Fallback to gradient if image fails
-                  const target = e.currentTarget as HTMLImageElement
-                  target.style.display = 'none'
-                  if (target.parentElement) {
-                    target.parentElement.className += ' bg-gradient-to-br from-blue-500/20 to-purple-500/20'
-                  }
-                }}
-              />
-            </div>
-          </div>
-        </GlassCard>
+    <>
+      {/* HERO + BACKGROUND FX */}
+      <div className="relative w-full h-screen overflow-hidden">
+        {/* Light Rays Background */}
+        <div className="absolute inset-0 z-0">
+          <LightRays
+            raysOrigin="top-center"
+            raysColor="white"
+            raysSpeed={1.2}
+            lightSpread={1}
+            rayLength={1.1}
+            followMouse={true}
+            mouseInfluence={0.06}
+            noiseAmount={0.05}
+            distortion={0.03}
+            className="opacity-100"
+          />
+        </div>
+        {/* Gradient Overlay for Readability */}
+        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/40 via-black/20 to-black/60" />
+        {/* Globe stays above rays */}
+        <div className="relative z-10">
+          <GlobeHero />
+        </div>
       </div>
+
+      {/* PAGE CONTENT */}
+      <div className="relative z-10 py-8">
+        <div className="mx-auto w-full max-w-[1000px] px-4 md:px-6">
+          {/* Hero Section */}
+          <div id="home-hero-section" className="mb-4">
+            <GlassCard padding="p-4" backgroundColor="bg-white/2">
+              <div className="flex items-center gap-3">
+                {/* Left - Text */}
+                <div className="flex-1">
+                  <h2 className="text-2xl font-semibold text-white mb-1.5 leading-tight">
+                    Build & Trade in<br />the Metaverse
+                  </h2>
+                  <p className="text-xs text-gray-400 mb-4 leading-relaxed">
+                    Invest in virtual properties and earn USDT rewards
+                  </p>
+                  <button
+                    onClick={handleBuyLandClick}
+                    className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-colors"
+                  >
+                    Buy Land
+                  </button>
+                </div>
+                
+                {/* Right - Hero Image */}
+                <div className="flex-shrink-0 w-32 h-32 rounded-2xl overflow-hidden">
+                  <img
+                    src="/images/herosection.png"
+                    alt="Metaverse"
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      // Fallback to gradient if image fails
+                      const target = e.currentTarget as HTMLImageElement
+                      target.style.display = 'none'
+                      if (target.parentElement) {
+                        target.parentElement.className += ' bg-gradient-to-br from-blue-500/20 to-purple-500/20'
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            </GlassCard>
+          </div>
 
       <SectionDivider />
 
       {/* Top Cities Section */}
       <div className="mb-4">
-        <h2 className="text-2xl font-bold text-white px-5 mb-4">Top Cities</h2>
-        <div className="overflow-x-auto px-5">
+        <h2 className="text-2xl font-bold text-white mb-4">Top Cities</h2>
+        <div className="overflow-x-auto">
           <div className="flex gap-4" style={{ width: 'max-content' }}>
             {TOP_CITIES.map((city) => (
               <CityCard
@@ -127,7 +157,7 @@ export default function HomePage() {
       <SectionDivider />
 
       {/* Markets to Invest In */}
-      <div className="px-5 mb-4">
+      <div className="mb-4">
         <GlassCard padding="p-6" backgroundColor="bg-white/3 opacity-75">
           <div className="flex items-center gap-2 mb-5">
             <h2 className="text-xl font-bold text-white">Markets to Invest In</h2>
@@ -156,7 +186,7 @@ export default function HomePage() {
       <SectionDivider />
 
       {/* Rewards/Referral Strip */}
-      <div className="px-5 mb-4">
+      <div className="mb-4">
         <GlassCard padding="p-5" backgroundColor="bg-blue-500/6">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1">
@@ -179,7 +209,7 @@ export default function HomePage() {
       {userStats && userStats.landsOwned > 0 && (
         <>
           <SectionDivider />
-          <div className="px-5">
+          <div>
             <GlassCard padding="p-6" backgroundColor="bg-white/3">
               <div className="flex items-center gap-5">
                 <div className="w-16 h-16 rounded-2xl bg-blue-500/20 flex items-center justify-center">
@@ -194,6 +224,8 @@ export default function HomePage() {
           </div>
         </>
       )}
-    </div>
+        </div>
+      </div>
+    </>
   )
 }

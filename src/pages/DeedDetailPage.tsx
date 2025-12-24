@@ -71,7 +71,7 @@ export default function DeedDetailPage() {
   }
 
   return (
-    <div className="py-8 px-4 md:px-6">
+    <div className="mx-auto w-full max-w-[1000px] px-4 md:px-6">
       {/* Back button */}
       <button
         onClick={() => navigate(-1)}

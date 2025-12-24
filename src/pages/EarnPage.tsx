@@ -71,7 +71,7 @@ export default function EarnPage() {
   }
 
   return (
-    <div className="py-8 px-4 md:px-6">
+    <div className="mx-auto w-full max-w-[1000px] px-4 md:px-6">
       {/* Header */}
       <div className="mb-6 px-4">
         <h1 className="text-3xl font-bold text-white mb-2">Your Referral Earnings</h1>

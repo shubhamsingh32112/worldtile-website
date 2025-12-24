@@ -164,7 +164,7 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="py-8 px-4 md:px-6">
+    <div className="mx-auto w-full max-w-[1000px] px-4 md:px-6">
       {/* Logout button */}
       <div className="flex justify-end mb-4 px-4">
         <button
