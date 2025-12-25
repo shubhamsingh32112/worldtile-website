@@ -7,7 +7,7 @@ import GlassCard from '../components/GlassCard'
 import ErrorState from '../components/ErrorState'
 import { Copy, CheckCircle, Download, ArrowLeft } from 'lucide-react'
 
-type PaymentState = 'waiting' | 'checking' | 'confirmed' | 'expired'
+type PaymentState = 'waiting' | 'checking' | 'confirmed' | 'expired' | 'failed'
 
 interface PaymentPageLocationState {
   amount?: string
@@ -31,7 +31,6 @@ export default function PaymentPage() {
   const [isVerifying, setIsVerifying] = useState(false)
   const [copiedAddress, setCopiedAddress] = useState(false)
   const [timeLeft, setTimeLeft] = useState<number>(0)
-  const [orderStatus, setOrderStatus] = useState<string>('PENDING')
 
   const amount = state?.amount || '0'
   const address = state?.address || ''
@@ -46,7 +45,6 @@ export default function PaymentPage() {
   const handleExpiry = async () => {
     // Immediately mark UI as expired
     setPaymentState('expired')
-    setOrderStatus('EXPIRED')
     setTimeLeft(0)
 
     // Trigger backend to clean up
@@ -74,20 +72,18 @@ export default function PaymentPage() {
         const result = await orderService.getOrderById(orderId)
         if (result.success && result.order) {
           if (result.order.expiresAt) {
+            // Timer drift fix: always compare to actual timestamp, never trust cached values
             const expiry = new Date(result.order.expiresAt).getTime()
             const diff = expiry - Date.now()
-            if (diff > 0) {
-              setTimeLeft(diff)
-            } else {
-              // Already expired
+            if (diff <= 0) {
+              // Already expired - always in sync with real time
               handleExpiry()
+            } else {
+              setTimeLeft(diff)
             }
           }
-          if (result.order.status) {
-            setOrderStatus(result.order.status)
-            if (result.order.status === 'EXPIRED') {
-              setPaymentState('expired')
-            }
+          if (result.order.status === 'EXPIRED') {
+            setPaymentState('expired')
           }
         }
       } catch (error) {
@@ -166,6 +162,12 @@ export default function PaymentPage() {
   const verifyPayment = async () => {
     if (!orderId || isVerifying) return
 
+    // Assert impossible states - prevent verification on non-interactive states
+    if (paymentState === 'expired' || paymentState === 'failed') {
+      console.warn('Attempted payment verification on a non-interactive state:', paymentState)
+      return // no point continuing
+    }
+
     setIsVerifying(true)
     setPaymentState('checking')
 
@@ -182,13 +184,14 @@ export default function PaymentPage() {
           navigate('/deeds')
         }, 3000)
       } else if (status === 'EXPIRED') {
+        // Network-sanity protection: backend says expired, sync frontend immediately
         setPaymentState('expired')
-        setOrderStatus('EXPIRED')
         setIsVerifying(false)
-        toast.error('Payment window expired. Slots have been released. Please place a new order.')
+        toast.error('Order expired. Tiles unlocked.')
         setTimeout(() => {
           navigate('/buy-land')
         }, 2000)
+        return // Early return to prevent further processing
       } else if (status === 'LATE_PAYMENT') {
         setPaymentState('waiting')
         setIsVerifying(false)
@@ -347,30 +350,33 @@ export default function PaymentPage() {
         </GlassCard>
 
         {/* Payment Verification */}
-        {paymentState !== 'confirmed' && paymentState !== 'expired' && (
-          <GlassCard padding="p-4">
-            <h3 className="text-lg font-bold text-white mb-2">
-              {paymentState === 'waiting' ? 'Waiting for Payment' : 'Checking Payment'}
-            </h3>
-            {paymentState === 'waiting' ? (
-              <p className="text-sm text-gray-400 mb-3">
-                After completing the payment in your wallet, click the button below to verify.
-              </p>
-            ) : (
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                <span className="text-sm text-gray-400">Checking for payment...</span>
-              </div>
-            )}
-            <button
-              onClick={verifyPayment}
-              disabled={isVerifying || paymentState === 'expired'}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors"
-            >
-              {isVerifying ? 'Checking...' : "I'VE PAID"}
-            </button>
-          </GlassCard>
-        )}
+        {paymentState !== 'confirmed' && paymentState !== 'expired' && (() => {
+          const isInteractive = paymentState === 'waiting' || paymentState === 'checking'
+          return (
+            <GlassCard padding="p-4">
+              <h3 className="text-lg font-bold text-white mb-2">
+                {paymentState === 'waiting' ? 'Waiting for Payment' : 'Checking Payment'}
+              </h3>
+              {paymentState === 'waiting' ? (
+                <p className="text-sm text-gray-400 mb-3">
+                  After completing the payment in your wallet, click the button below to verify.
+                </p>
+              ) : (
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  <span className="text-sm text-gray-400">Checking for payment...</span>
+                </div>
+              )}
+              <button
+                onClick={verifyPayment}
+                disabled={!isInteractive || isVerifying}
+                className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors"
+              >
+                {isVerifying ? 'Checking...' : "I'VE PAID"}
+              </button>
+            </GlassCard>
+          )
+        })()}
 
         {/* Payment Confirmed */}
         {paymentState === 'confirmed' && (

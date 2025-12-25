@@ -13,7 +13,7 @@ export interface CreateOrderResponse {
   address?: string
   network?: string
   assignedSlots?: string[] // Slots assigned by backend
-  expiresAt?: string // Expiry timestamp
+  expiresAt?: string | null
   message?: string
   status?: number // HTTP status code for error handling
   meta?: {
@@ -72,6 +72,7 @@ export const orderService = {
         address: string
         network: string
         assignedSlots: string[]
+        expiresAt: string
       }>('/orders/create', request)
       return {
         success: true,
@@ -80,7 +81,7 @@ export const orderService = {
         address: response.data.address,
         network: response.data.network,
         assignedSlots: response.data.assignedSlots,
-        expiresAt: response.data.expiresAt,
+        expiresAt: response.data.expiresAt ?? null,
       }
     } catch (error: any) {
       const message = error.response?.data?.message || 'Failed to create order'

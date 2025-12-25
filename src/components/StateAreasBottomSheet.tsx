@@ -103,7 +103,7 @@ export default function StateAreasBottomSheet({ stateKey, onClose }: StateAreasB
                       <div>
                         <span className="text-xs text-gray-400">Price: </span>
                         <span className="text-sm font-bold text-blue-400">
-                          {area.priceUSDT || 115} USDT per tile
+                          {area.priceUSDT || 110} USDT per tile
                         </span>
                       </div>
                     </div>

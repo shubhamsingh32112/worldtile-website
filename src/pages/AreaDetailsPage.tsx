@@ -144,7 +144,7 @@ export default function AreaDetailsPage() {
     )
   }
 
-  const totalPrice = (area.priceUSDT || 115) * quantity
+  const totalPrice = (area.priceUSDT || 110) * quantity
 
   return (
  <div className="mx-auto w-full max-w-[1000px] px-4 md:px-6">
@@ -168,7 +168,7 @@ export default function AreaDetailsPage() {
         <GlassCard padding="p-5">
           <div>
             <p className="text-gray-400 text-sm mb-1">Price</p>
-            <p className="text-2xl font-bold text-blue-500">{area.priceUSDT || 115} USDT</p>
+            <p className="text-2xl font-bold text-blue-500">{area.priceUSDT || 110} USDT</p>
           </div>
         </GlassCard>
 
