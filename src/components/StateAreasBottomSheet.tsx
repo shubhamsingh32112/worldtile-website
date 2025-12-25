@@ -93,13 +93,11 @@ export default function StateAreasBottomSheet({ stateKey, onClose }: StateAreasB
                     </div>
                     <p className="text-sm text-gray-400 mb-3">{area.stateName}</p>
                     
-                    {/* Available slots indicator */}
+                    {/* Tile size and price */}
                     <div className="flex items-center gap-4">
                       <div>
-                        <span className={`text-sm font-bold ${
-                          area.remainingSlots < 10 ? 'text-orange-400' : 'text-green-400'
-                        }`}>
-                          {area.remainingSlots > 0 ? 'Slots available' : 'No slots available'}
+                        <span className="text-sm font-bold text-gray-300">
+                          1 tile = 43560 sqft
                         </span>
                       </div>
                       <div>

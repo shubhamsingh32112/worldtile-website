@@ -102,7 +102,7 @@ export default function HomePage() {
       <div className="mb-16 text-center px-4">
   <h2
     className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 tracking-tight leading-tight drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)]">
-    Own the Future: <span className="bg-purple-600 bg-clip-text text-transparent">The Digital Land Rush</span>
+    Own the Future: <span className="text-white bg-clip-text text-transparent">The Digital Land Rush</span>
   </h2>
 
   <p
