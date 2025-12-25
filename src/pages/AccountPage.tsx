@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUserAccount } from '../hooks/useUserAccount'
+import { useUserLands } from '../hooks/useUserLands'
 import { accountService } from '../services/accountService'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import GlassCard from '../components/GlassCard'
+import StatCard from '../components/StatCard'
 import ErrorState from '../components/ErrorState'
 import AccountPageSkeleton from '../components/AccountPageSkeleton'
-import { Check, Copy, Share2, Wallet, Lock, LogOut } from 'lucide-react'
+import { Check, Lock, LogOut, Grid3x3, DollarSign } from 'lucide-react'
 
 export default function AccountPage() {
   const navigate = useNavigate()
@@ -16,6 +18,7 @@ export default function AccountPage() {
   const toast = useToast()
   const queryClient = useQueryClient()
   const { data: account, isLoading, error } = useUserAccount()
+  const { data: lands, isLoading: isLoadingLands } = useUserLands()
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false)
   const [editingName, setEditingName] = useState(false)
   const [editingPhone, setEditingPhone] = useState(false)
@@ -25,7 +28,6 @@ export default function AccountPage() {
   const [originalPhone, setOriginalPhone] = useState('')
   const [referralCode, setReferralCode] = useState('')
   const [isAddingReferral, setIsAddingReferral] = useState(false)
-  const [copiedReferral, setCopiedReferral] = useState(false)
 
   // Update form values when account data loads
   useEffect(() => {
@@ -128,27 +130,19 @@ export default function AccountPage() {
     }
   }
 
-  const copyReferralCode = async (code: string) => {
+  // Calculate tiles owned and total value
+  const tilesCount = lands?.length || 0
+  const totalValue = lands?.reduce((sum, land) => {
+    return sum + parseFloat(land.purchasePriceUSDT || '0')
+  }, 0) || 0
+
+  const formatUSDT = (amount: number): string => {
     try {
-      await navigator.clipboard.writeText(code)
-      setCopiedReferral(true)
-      setTimeout(() => setCopiedReferral(false), 2000)
-    } catch (error) {
-      console.error('Failed to copy:', error)
+      if (amount === 0) return '0.00'
+      return amount.toFixed(2)
+    } catch {
+      return '0.00'
     }
-  }
-
-  const shareReferralCodeViaWhatsApp = (code: string) => {
-
-    const message = `🌟 Join WorldTile Metaverse!\n\nBuy virtual land and build your digital empire! 🏰\n\nUse my referral code: ${code}\n\ and use code when signing up`
-    const encodedMessage = encodeURIComponent(message)
-    const whatsappUrl = `https://wa.me/?text=${encodedMessage}`
-    window.open(whatsappUrl, '_blank')
-  }
-
-  const maskAddress = (address: string): string => {
-    if (address.length <= 10) return address
-    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`
   }
 
 
@@ -330,69 +324,21 @@ export default function AccountPage() {
           </GlassCard>
         )}
 
-        {/* Your Referral Code */}
-        {account.referralCode && (
-          <GlassCard padding="p-5" backgroundColor="bg-blue-500/20">
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <Share2 className="w-5 h-5" />
-              Your Referral Code
-            </h3>
-            <div className="bg-blue-500/15 border border-blue-500/30 rounded-xl p-4 mb-3">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-blue-400 font-bold text-sm tracking-widest flex-1">
-                  {account.referralCode}
-                </span>
-                <div className="flex gap-1">
-                  <button
-                    onClick={() => shareReferralCodeViaWhatsApp(account.referralCode!)}
-                    className="p-2 hover:bg-green-500/20 rounded-lg transition-colors"
-                    title="Share on WhatsApp"
-                  >
-                    <Share2 className="w-5 h-5 text-green-400" />
-                  </button>
-                  <button
-                    onClick={() => copyReferralCode(account.referralCode!)}
-                    className="p-2 hover:bg-blue-500/20 rounded-lg transition-colors"
-                    title="Copy code"
-                  >
-                    {copiedReferral ? (
-                      <Check className="w-5 h-5 text-green-400" />
-                    ) : (
-                      <Copy className="w-5 h-5 text-blue-400" />
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-            <p className="text-xs text-gray-400">
-              Share your code and earn {account.commissionRatePercent.toFixed(1)}% commission!
-            </p>
-          </GlassCard>
-        )}
-
-        {/* Wallet Section */}
-        <GlassCard padding="p-5">
-          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <Wallet className="w-5 h-5 text-blue-500" />
-            Wallet
-          </h3>
-          {account.walletAddress ? (
-            <div>
-              <p className="text-xs text-green-400 mb-2">Connected</p>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-white font-mono">{maskAddress(account.walletAddress)}</span>
-                <button
-                  onClick={() => copyReferralCode(account.walletAddress!)}
-                  className="p-1 hover:bg-white/10 rounded transition-colors"
-                >
-                  <Copy className="w-4 h-4 text-gray-400" />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <p className="text-sm text-gray-400">Connect wallet (coming soon)</p>
-          )}
-        </GlassCard>
+        {/* Tiles Owned & Value */}
+        <div className="grid grid-cols-2 gap-3">
+          <StatCard
+            title="Tiles Owned"
+            value={isLoadingLands ? '...' : `${tilesCount}`}
+            icon={Grid3x3}
+            color="text-purple-400"
+          />
+          <StatCard
+            title="Total Value"
+            value={isLoadingLands ? '...' : `${formatUSDT(totalValue)} USDT`}
+            icon={DollarSign}
+            color="text-blue-400"
+          />
+        </div>
       </div>
     </div>
   )

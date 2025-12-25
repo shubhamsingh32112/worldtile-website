@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import AppShell from './layouts/AppShell'
 import LoginPage from './pages/auth/LoginPage'
@@ -29,6 +29,25 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+function RootRedirect() {
+  const [searchParams] = useSearchParams()
+  const { user } = useAuth()
+  const refCode = searchParams.get('ref')
+  
+  // If there's a ref parameter and user is not logged in, redirect to signup with it
+  if (refCode && !user) {
+    return <Navigate to={`/signup?ref=${refCode}`} replace />
+  }
+  
+  // If there's a ref parameter but user is logged in, redirect to home (they don't need signup)
+  if (refCode && user) {
+    return <Navigate to="/home" replace />
+  }
+  
+  // Otherwise, redirect to home
+  return <Navigate to="/home" replace />
+}
+
 function AppRouter() {
   const { user, loading } = useAuth()
 
@@ -38,13 +57,15 @@ function AppRouter() {
 
   return (
     <Routes>
+      {/* REF + ROOT HANDLER (no AppShell) */}
+      <Route path="/" element={<RootRedirect />} />
+
+      {/* AUTH ROUTES (no AppShell) */}
       <Route path="/login" element={user ? <Navigate to="/home" replace /> : <LoginPage />} />
       <Route path="/signup" element={user ? <Navigate to="/home" replace /> : <SignupPage />} />
-      
-      {/* All routes use AppShell, but only some require authentication */}
-      <Route path="/" element={<AppShell />}>
-        <Route index element={<Navigate to="/home" replace />} />
-        {/* Public routes - no authentication required */}
+
+      {/* ALL OTHER ROUTES UNDER APPSHELL */}
+      <Route element={<AppShell />}>
         <Route path="home" element={<HomePage />} />
         <Route path="privacy-policy" element={<PrivacyPolicy />} />
         <Route path="refund-policy" element={<RefundPolicy />} />
@@ -52,8 +73,8 @@ function AppRouter() {
         <Route path="become-an-agent" element={<AgentProgram />} />
         <Route path="support" element={<Support />} />
         <Route path="contact-us" element={<ContactUs />} />
-        
-        {/* Protected routes - require authentication */}
+
+        {/* PROTECTED */}
         <Route
           path="buy-land"
           element={

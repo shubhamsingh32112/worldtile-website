@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { useAuth } from '../../context/AuthContext'
 import { Mail, Lock, User, AlertCircle } from 'lucide-react'
@@ -14,6 +14,7 @@ interface SignupFormData {
 
 export default function SignupPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { signup, loginWithGoogle } = useAuth()
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState(false)
@@ -23,9 +24,18 @@ export default function SignupPage() {
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<SignupFormData>()
 
   const password = watch('password')
+
+  // Pre-fill referral code from URL parameter
+  useEffect(() => {
+    const refCode = searchParams.get('ref')
+    if (refCode) {
+      setValue('referralCode', refCode.toUpperCase())
+    }
+  }, [searchParams, setValue])
 
   const onSubmit = async (data: SignupFormData) => {
     setError('')
