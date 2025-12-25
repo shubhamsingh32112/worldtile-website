@@ -401,9 +401,37 @@ export default function BuyLandPage() {
     }
   }
 
-  // Extract state key from feature properties
+  // Map state names to their database stateKeys
+  const stateNameToKeyMap: Record<string, string> = {
+    'tamil nadu': 'tamil_nadu',
+    'tamilnadu': 'tamil_nadu',
+    'west bengal': 'westbengal',
+    'westbengal': 'westbengal',
+    'delhi ncr': 'nctofdelhi',
+    'delhi': 'nctofdelhi',
+    'nct of delhi': 'nctofdelhi',
+  }
+
+  // Extract state key from feature properties and normalize it
   const extractStateKey = (properties: any): string | null => {
-    return properties?.stateKey || properties?.NAME_1 || null
+    let rawKey = properties?.stateKey || properties?.NAME_1 || null
+    if (!rawKey) return null
+    
+    // Normalize: lowercase and trim
+    const normalized = rawKey.toString().toLowerCase().trim()
+    
+    // Check if we have a direct mapping for this state name
+    if (stateNameToKeyMap[normalized]) {
+      return stateNameToKeyMap[normalized]
+    }
+    
+    // If it already has underscores or is camelCase, use as is
+    if (normalized.includes('_') || /^[a-z_]+$/.test(normalized)) {
+      return normalized
+    }
+    
+    // Convert spaces to underscores and remove any special characters
+    return normalized.replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')
   }
 
   // Handle map click - check if clicked on a state

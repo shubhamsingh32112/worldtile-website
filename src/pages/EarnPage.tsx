@@ -114,7 +114,7 @@ export default function EarnPage() {
           {/* Withdrawal button */}
           <button
             onClick={handleWithdrawal}
-            className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+            className="w-full py-4 bg-purple-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
           >
             <DollarSign className="w-5 h-5" />
             Withdraw Earnings

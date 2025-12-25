@@ -129,7 +129,7 @@ export default function DeedsPage() {
                   e.stopPropagation()
                   handleViewDeed(land.landSlotId)
                 }}
-                className="w-full mt-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors"
+                className="w-full mt-4 py-3 bg-purple-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors"
               >
                 View Deed
               </button>

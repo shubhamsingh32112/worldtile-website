@@ -102,7 +102,7 @@ export default function HomePage() {
       <div className="mb-16 text-center px-4">
   <h2
     className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 tracking-tight leading-tight drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)]">
-    Own the Future: <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 bg-clip-text text-transparent">The Digital Land Rush</span>
+    Own the Future: <span className="bg-purple-600 bg-clip-text text-transparent">The Digital Land Rush</span>
   </h2>
 
   <p
@@ -116,7 +116,7 @@ export default function HomePage() {
   </p>
 
   <div className="mt-8">
-    <button onClick={handleBuyLandClick} className="px-6 py-3 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:scale-105 transition-transform">
+    <button onClick={handleBuyLandClick} className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-xl shadow-lg hover:scale-105 transition-transform">
       Explore the Metaverse
     </button>
   </div>
@@ -126,7 +126,7 @@ export default function HomePage() {
 
   {/* Card 1 */}
   <GlassCard padding="p-6" backgroundColor="bg-white/10">
-    <div className="w-14 h-14 bg-gradient-to-r from-purple-600 to-pink-500 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-purple-600/30">
+    <div className="w-14 h-14 bg-purple-600 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-purple-600/30">
       <MessageSquare className="w-7 h-7 text-white" />
     </div>
     <h3 className="text-xl font-bold text-white mb-3">Why Digital Real Estate?</h3>
@@ -139,7 +139,7 @@ export default function HomePage() {
 
   {/* Card 2 */}
   <GlassCard padding="p-6" backgroundColor="bg-white/10">
-    <div className="w-14 h-14 bg-gradient-to-r from-purple-600 to-pink-500 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-purple-600/30">
+    <div className="w-14 h-14 bg-purple-600 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-purple-600/30">
       <TrendingUp className="w-7 h-7 text-white" />
     </div>
     <h3 className="text-xl font-bold text-white mb-3">Endless Earning Potential</h3>
@@ -155,7 +155,7 @@ export default function HomePage() {
 
   {/* Card 3 */}
   <GlassCard padding="p-6" backgroundColor="bg-white/10">
-    <div className="w-14 h-14 bg-gradient-to-r from-purple-600 to-pink-500 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-purple-600/30">
+    <div className="w-14 h-14 bg-purple-600 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-purple-600/30">
       <Users className="w-7 h-7 text-white" />
     </div>
     <h3 className="text-xl font-bold text-white mb-3">25% Referral Bonus</h3>
@@ -172,7 +172,7 @@ export default function HomePage() {
 
   {/* Card 4 */}
   <GlassCard padding="p-6" backgroundColor="bg-white/10">
-    <div className="w-14 h-14 bg-gradient-to-r from-purple-600 to-pink-500 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-purple-600/30">
+    <div className="w-14 h-14 bg-purple-600 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-purple-600/30">
       <Zap className="w-7 h-7 text-white" />
     </div>
     <h3 className="text-xl font-bold text-white mb-3">Don’t Watch From The Sidelines</h3>
@@ -180,7 +180,7 @@ export default function HomePage() {
       The revolution is happening. This is your chance to own a stake in the foundation of a new world.
       Don’t wait for “someday.” Build today.
     </p>
-    <button onClick={handleBuyLandClick} className="w-full py-3 bg-gradient-to-r from-purple-600 to-pink-500 rounded-xl text-white font-semibold shadow-lg hover:scale-105 transition">
+    <button onClick={handleBuyLandClick} className="w-full py-3 bg-purple-600  rounded-xl text-white font-semibold shadow-lg hover:scale-105 transition">
       Secure Your Land @ $100/Acre
     </button>
   </GlassCard>
@@ -322,7 +322,7 @@ export default function HomePage() {
             </div>
             <button
               onClick={handleInviteFriendsClick}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors whitespace-nowrap"
+              className="px-6 py-3 bg-purple-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors whitespace-nowrap"
             >
               Invite Friends
             </button>

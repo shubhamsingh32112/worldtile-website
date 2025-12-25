@@ -96,17 +96,16 @@ export default function StateAreasBottomSheet({ stateKey, onClose }: StateAreasB
                     {/* Available slots indicator */}
                     <div className="flex items-center gap-4">
                       <div>
-                        <span className="text-xs text-gray-400">Available: </span>
                         <span className={`text-sm font-bold ${
                           area.remainingSlots < 10 ? 'text-orange-400' : 'text-green-400'
                         }`}>
-                          {area.remainingSlots} / {area.totalSlots}
+                          {area.remainingSlots > 0 ? 'Slots available' : 'No slots available'}
                         </span>
                       </div>
                       <div>
                         <span className="text-xs text-gray-400">Price: </span>
                         <span className="text-sm font-bold text-blue-400">
-                          {area.priceUSDT || 110} USDT
+                          {area.priceUSDT || 110} USDT per tile
                         </span>
                       </div>
                     </div>
