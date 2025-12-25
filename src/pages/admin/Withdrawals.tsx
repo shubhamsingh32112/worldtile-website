@@ -10,7 +10,8 @@ export default function Withdrawals() {
   const [statusFilter, setStatusFilter] = useState<string>('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [notes, setNotes] = useState('')
-  const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null)
+  const [payoutTxHash, setPayoutTxHash] = useState('')
+  const [actionType, setActionType] = useState<'approve' | 'reject' | 'markPaid' | null>(null)
   const { showToast } = useToast()
   const queryClient = useQueryClient()
 
@@ -59,7 +60,7 @@ export default function Withdrawals() {
     },
   })
 
-  const handleAction = (id: string, type: 'approve' | 'reject') => {
+  const handleAction = (id: string, type: 'approve' | 'reject' | 'markPaid') => {
     setSelectedId(id)
     setActionType(type)
   }
@@ -69,8 +70,18 @@ export default function Withdrawals() {
 
     if (actionType === 'approve') {
       approveMutation.mutate({ id: selectedId, notes: notes || undefined })
-    } else {
+    } else if (actionType === 'reject') {
       rejectMutation.mutate({ id: selectedId, notes: notes || undefined })
+    } else if (actionType === 'markPaid') {
+      if (!payoutTxHash.trim()) {
+        showToast('Payout transaction hash is required', 'error')
+        return
+      }
+      markPaidMutation.mutate({
+        id: selectedId,
+        payoutTxHash: payoutTxHash.trim(),
+        notes: notes || undefined,
+      })
     }
   }
 
@@ -207,6 +218,19 @@ export default function Withdrawals() {
                           >
                             Reject
                           </button>
+                        </div>
+                      )}
+                      {withdrawal.status === 'APPROVED' && (
+                        <button
+                          onClick={() => handleAction(withdrawal.id, 'markPaid')}
+                          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+                        >
+                          Mark as Paid
+                        </button>
+                      )}
+                      {withdrawal.payoutTxHash && (
+                        <div className="text-xs text-white/50 mt-1 font-mono">
+                          TX: {withdrawal.payoutTxHash.slice(0, 10)}...{withdrawal.payoutTxHash.slice(-8)}
                         </div>
                       )}
                       {withdrawal.adminNotes && (

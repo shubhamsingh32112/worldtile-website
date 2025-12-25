@@ -1,21 +1,22 @@
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { useEffect } from 'react'
+import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function AdminLayout() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
+  const { user, loading } = useAuth()
 
-  useEffect(() => {
-    // Redirect if not admin
-    if (user && user.role !== 'ADMIN') {
-      navigate('/home')
-    }
-  }, [user, navigate])
+  // Loading gate - prevent flicker
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    )
+  }
 
-  // Show loading or redirect if not admin
+  // Redirect if not admin
   if (!user || user.role !== 'ADMIN') {
-    return null
+    return <Navigate to="/home" replace />
   }
 
   const navItems = [

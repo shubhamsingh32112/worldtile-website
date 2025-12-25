@@ -179,6 +179,21 @@ export const adminService = {
   },
 
   /**
+   * Mark withdrawal as paid (COMPLETED) with transaction hash
+   */
+  async markWithdrawalAsPaid(
+    withdrawalId: string,
+    payoutTxHash: string,
+    notes?: string
+  ): Promise<{ success: boolean; message: string }> {
+    const response = await api.post<{ success: boolean; message: string }>(
+      `/admin/withdrawals/${withdrawalId}/mark-paid`,
+      { payoutTxHash, notes }
+    )
+    return response.data
+  },
+
+  /**
    * Get business earnings
    */
   async getBusinessEarnings(params?: {
