@@ -14,7 +14,7 @@ export interface AdminStats {
 
 export interface Payment {
   id: string
-  txHash: string
+  txHash: string | null
   user: {
     id: string
     name: string
@@ -22,13 +22,14 @@ export interface Payment {
   }
   orderId: string
   amount: string
-  confirmations: number
+  confirmations: number | null
   status: 'PENDING' | 'COMPLETED' | 'FAILED'
   orderStatus: string
-  fromAddress: string
+  fromAddress: string | null
   toAddress: string
-  blockTimestamp: string
+  blockTimestamp: string | null
   createdAt: string
+  isVerified?: boolean // Whether it has a PaymentTransaction record
 }
 
 export interface Withdrawal {
@@ -94,6 +95,16 @@ export interface PaginatedResponse<T> {
   }
 }
 
+export interface PaymentsResponse {
+  payments: Payment[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
+}
+
 export const adminService = {
   /**
    * Get dashboard overview statistics
@@ -113,10 +124,10 @@ export const adminService = {
     limit?: number
     status?: string
     search?: string
-  }): Promise<{ success: boolean; data: PaginatedResponse<Payment> }> {
+  }): Promise<{ success: boolean; data: PaymentsResponse }> {
     const response = await api.get<{
       success: boolean
-      data: PaginatedResponse<Payment>
+      data: PaymentsResponse
     }>('/admin/payments', { params })
     return response.data
   },

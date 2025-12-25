@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { adminService } from '../../services/adminService'
+import { adminService, Payment } from '../../services/adminService'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import ErrorState from '../../components/ErrorState'
 import { useToast } from '../../context/ToastContext'
@@ -49,7 +49,9 @@ export default function Payments() {
     return <ErrorState message="Failed to load payments" />
   }
 
-  const payments = data?.data || []
+  if (data) console.log("💳 PAYMENTS RESPONSE:", data)
+
+  const payments = data?.payments || []
   const pagination = data?.pagination || { page: 1, totalPages: 1, total: 0 }
 
   const getStatusColor = (status: string) => {
@@ -133,7 +135,7 @@ export default function Payments() {
                   </td>
                 </tr>
               ) : (
-                payments.map((payment) => (
+                payments.map((payment: Payment) => (
                   <tr key={payment.id} className="hover:bg-white/5">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-white">{payment.user.name}</div>
@@ -146,30 +148,47 @@ export default function Payments() {
                       })}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-white/70 font-mono">
-                        {payment.txHash.slice(0, 10)}...{payment.txHash.slice(-8)}
-                      </div>
+                      {payment.txHash ? (
+                        <div className="text-sm text-white/70 font-mono">
+                          {payment.txHash.slice(0, 10)}...{payment.txHash.slice(-8)}
+                        </div>
+                      ) : (
+                        <div className="text-sm text-white/50 italic">Not verified yet</div>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                      {payment.confirmations}/19
+                      {payment.confirmations !== null && payment.confirmations !== undefined
+                        ? `${payment.confirmations}/19`
+                        : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                          payment.status
-                        )}`}
-                      >
-                        {payment.status}
-                      </span>
+                      <div className="flex flex-col gap-1">
+                        <span
+                          className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                            payment.status
+                          )}`}
+                        >
+                          {payment.status}
+                        </span>
+                        {!payment.isVerified && payment.status === 'COMPLETED' && (
+                          <span className="text-xs text-yellow-500 font-semibold">
+                            Missing TX - Manual Verify Needed
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button
-                        onClick={() => verifyMutation.mutate(payment.id)}
-                        disabled={verifyMutation.isPending}
-                        className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition disabled:opacity-50"
-                      >
-                        {verifyMutation.isPending ? 'Verifying...' : 'Verify'}
-                      </button>
+                      {payment.id.startsWith('pending-') ? (
+                        <span className="text-xs text-yellow-400">Awaiting payment</span>
+                      ) : (
+                        <button
+                          onClick={() => verifyMutation.mutate(payment.id)}
+                          disabled={verifyMutation.isPending}
+                          className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition disabled:opacity-50"
+                        >
+                          {verifyMutation.isPending ? 'Verifying...' : 'Verify'}
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))
