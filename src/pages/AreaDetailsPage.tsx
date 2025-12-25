@@ -88,28 +88,37 @@ export default function AreaDetailsPage() {
     setIsPurchasing(true)
 
     try {
-      // Step 1: Get available land slots
-      const slotsResult = await areaService.getAvailableSlots(areaKey, quantity)
-      if (!slotsResult.success || !slotsResult.landSlots) {
-        toast.error(slotsResult.message || 'No available slots found')
-        return
-      }
-
-      const landSlotIds = slotsResult.landSlots.map((slot) => slot.landSlotId)
-
-      // Step 2: Create order
+      // Create order - backend will atomically assign slots
+      // This prevents race conditions when multiple users click simultaneously
       const orderResult = await orderService.createOrder({
         state: area.stateKey,
         place: areaKey,
-        landSlotIds,
+        quantity,
       })
 
       if (!orderResult.success || !orderResult.orderId) {
+        // Handle 409 Conflict - slots became unavailable
+        if (orderResult.status === 409) {
+          const available = orderResult.meta?.available ?? 0
+          
+          if (available > 0) {
+            // Auto-correct quantity to available slots
+            toast.warning(`Only ${available} slot(s) remain here.`, 4000)
+            setQuantity(available)
+          } else {
+            toast.warning(orderResult.message || 'No slots available')
+          }
+          
+          // Refresh area details to show updated availability
+          await loadAreaDetails()
+          return
+        }
+        
         toast.error(orderResult.message || 'Failed to create order')
         return
       }
 
-      // Step 3: Navigate to payment page
+      // Navigate to payment page
       navigate(`/payment/${orderResult.orderId}`, {
         state: {
           amount: orderResult.amount,
@@ -117,7 +126,7 @@ export default function AreaDetailsPage() {
           network: orderResult.network,
           state: area.stateName,
           place: area.areaName,
-          landSlotIds,
+          landSlotIds: orderResult.assignedSlots || [], // Use slots assigned by backend
           quantity,
         },
       })

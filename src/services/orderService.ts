@@ -3,7 +3,7 @@ import api from './api'
 export interface CreateOrderRequest {
   state: string
   place: string
-  landSlotIds: string[]
+  quantity: number
 }
 
 export interface CreateOrderResponse {
@@ -12,7 +12,13 @@ export interface CreateOrderResponse {
   amount?: string
   address?: string
   network?: string
+  assignedSlots?: string[] // Slots assigned by backend
   message?: string
+  status?: number // HTTP status code for error handling
+  meta?: {
+    available?: number // Available slots count (for 409 errors)
+    requested?: number // Requested quantity (for 409 errors)
+  }
 }
 
 export interface SubmitTransactionRequest {
@@ -54,6 +60,7 @@ export interface UserOrdersResponse {
 export const orderService = {
   /**
    * Create a new order for buying virtual land
+   * Backend atomically assigns slots to prevent race conditions
    */
   async createOrder(request: CreateOrderRequest): Promise<CreateOrderResponse> {
     try {
@@ -62,6 +69,7 @@ export const orderService = {
         amount: string
         address: string
         network: string
+        assignedSlots: string[]
       }>('/orders/create', request)
       return {
         success: true,
@@ -69,12 +77,17 @@ export const orderService = {
         amount: response.data.amount,
         address: response.data.address,
         network: response.data.network,
+        assignedSlots: response.data.assignedSlots,
       }
     } catch (error: any) {
       const message = error.response?.data?.message || 'Failed to create order'
+      const status = error.response?.status
+      const meta = error.response?.data?.meta
       return {
         success: false,
         message,
+        status, // Include status code for 409 Conflict handling
+        meta, // Include metadata (available slots count, etc.)
       }
     }
   },
