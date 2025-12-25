@@ -35,20 +35,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth()
-  
-  if (!user) {
-    return <Navigate to="/login" replace />
-  }
-  
-  if (user.role !== 'ADMIN') {
-    return <Navigate to="/home" replace />
-  }
-  
-  return <>{children}</>
-}
-
 function RootRedirect() {
   const [searchParams] = useSearchParams()
   const { user } = useAuth()
