@@ -33,7 +33,8 @@ export default function Agents() {
     return <ErrorState message="Failed to load agents" />
   }
 
-  const agents = data?.data || []
+  // Because backend returns agents directly at the root of response
+  const agents = data?.agents || []
   const pagination = data?.pagination || { page: 1, totalPages: 1, total: 0 }
 
   return (
