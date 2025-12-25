@@ -32,10 +32,10 @@ const getCityImagePath = (cityName: string): string => {
 }
 
 const TOP_CITIES: City[] = [
-  { name: 'Bangalore', change: '+12.5%', price: '110 USDT', isPositive: true, stateKey: 'karnataka', imagePath: getCityImagePath('Bangalore') },
-  { name: 'Pune', change: '+8.3%', price: '110 USDT', isPositive: true, stateKey: 'maharashtra', imagePath: getCityImagePath('Pune') },
-  { name: 'Jaipur', change: '+7%', price: '110 USDT', isPositive: true, stateKey: 'rajasthan', imagePath: getCityImagePath('Jaipur') },
-  { name: 'Delhi', change: '+14%', price: '110 USDT', isPositive: true, stateKey: 'NCTofDelhi', imagePath: getCityImagePath('Delhi') },
+  { name: 'Bangalore', change: '+12.5%', price: '115 USDT', isPositive: true, stateKey: 'karnataka', imagePath: getCityImagePath('Bangalore') },
+  { name: 'Pune', change: '+8.3%', price: '115 USDT', isPositive: true, stateKey: 'maharashtra', imagePath: getCityImagePath('Pune') },
+  { name: 'Jaipur', change: '+7%', price: '115 USDT', isPositive: true, stateKey: 'rajasthan', imagePath: getCityImagePath('Jaipur') },
+  { name: 'Delhi', change: '+14%', price: '115 USDT', isPositive: true, stateKey: 'NCTofDelhi', imagePath: getCityImagePath('Delhi') },
 ]
 
 export default function HomePage() {
@@ -267,7 +267,7 @@ export default function HomePage() {
     q: "How do I make a crypto payment to buy a tile on World Tile?",
     a: `Select your land, proceed to payment, and you will see a QR and wallet address. Scan using MetaMask, Trust Wallet, Binance, KuCoin or copy the address manually.
 
-    Send 110 USDT on TRC20 (TRX) ONLY. Payments on the wrong network cannot be recovered.
+    Send 115 USDT on TRC20 (TRX) ONLY. Payments on the wrong network cannot be recovered.
 
     After sending, click “I’ve Paid”. The system verifies your transaction on-chain within seconds and allots your tile automatically.`
   },

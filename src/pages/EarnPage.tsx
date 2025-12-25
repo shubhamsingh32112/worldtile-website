@@ -77,8 +77,8 @@ export default function EarnPage() {
     return total + (property.slots?.length || 0)
   }, 0)
 
-  // Calculate total value (lands sold * 110 USDT per land)
-  const LAND_PRICE_USDT = 110
+  // Calculate total value (lands sold * 115 USDT per land)
+  const LAND_PRICE_USDT = 115
   const totalLandsValue = totalLandsSold * LAND_PRICE_USDT
 
   return (

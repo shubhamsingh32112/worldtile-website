@@ -34,13 +34,6 @@ export default function AreaDetailsPage() {
       const result = await areaService.getAreaDetails(areaKey)
       if (result.success && result.area) {
         setArea(result.area)
-        // Adjust quantity if it exceeds remaining slots
-        const remainingSlots = result.area.remainingSlots || 0
-        if (quantity > remainingSlots && remainingSlots > 0) {
-          setQuantity(remainingSlots)
-        } else if (remainingSlots === 0) {
-          setQuantity(0)
-        }
       } else {
         setErrorMessage(result.message || 'Failed to load area details')
       }
@@ -52,12 +45,8 @@ export default function AreaDetailsPage() {
   }
 
   const handleQuantityChange = (delta: number) => {
-    if (!area) return
-
-    const remainingSlots = area.remainingSlots || 0
     const newQuantity = quantity + delta
-
-    if (newQuantity >= 1 && newQuantity <= remainingSlots) {
+    if (newQuantity >= 1) {
       setQuantity(newQuantity)
     }
   }
@@ -73,15 +62,8 @@ export default function AreaDetailsPage() {
       return
     }
 
-    // Check if slots are available
-    const remainingSlots = area.remainingSlots || 0
-    if (remainingSlots === 0) {
-      toast.error('No slots available for this area')
-      return
-    }
-
-    if (quantity < 1 || quantity > remainingSlots) {
-      toast.warning(`Please select quantity between 1 and ${remainingSlots}`)
+    if (quantity < 1) {
+      toast.warning('Please select at least 1 tile')
       return
     }
 
@@ -161,8 +143,7 @@ export default function AreaDetailsPage() {
     )
   }
 
-  const remainingSlots = area.remainingSlots || 0
-  const totalPrice = (area.priceUSDT || 110) * quantity
+  const totalPrice = (area.priceUSDT || 115) * quantity
 
   return (
  <div className="mx-auto w-full max-w-[1000px] px-4 md:px-6">
@@ -184,17 +165,9 @@ export default function AreaDetailsPage() {
 
         {/* Price Card */}
         <GlassCard padding="p-5">
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-gray-400 text-sm mb-1">Price</p>
-              <p className="text-2xl font-bold text-blue-500">{area.priceUSDT} USDT</p>
-            </div>
-            <div className="text-right">
-              <p className="text-gray-400 text-sm mb-1">Available Slots</p>
-              <p className={`text-xl font-bold ${remainingSlots < 10 ? 'text-orange-400' : 'text-white'}`}>
-                {remainingSlots} / {area.totalSlots}
-              </p>
-            </div>
+          <div>
+            <p className="text-gray-400 text-sm mb-1">Price</p>
+            <p className="text-2xl font-bold text-blue-500">{area.priceUSDT || 115} USDT</p>
           </div>
         </GlassCard>
 
@@ -219,7 +192,7 @@ export default function AreaDetailsPage() {
           <div className="flex items-center gap-4 mb-4">
             <button
               onClick={() => handleQuantityChange(-1)}
-              disabled={quantity <= 1 || remainingSlots === 0 || isPurchasing}
+              disabled={quantity <= 1 || isPurchasing}
               className="p-2 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Minus className="w-6 h-6 text-blue-500" />
@@ -227,7 +200,7 @@ export default function AreaDetailsPage() {
             <span className="text-2xl font-bold text-white flex-1 text-center">{quantity}</span>
             <button
               onClick={() => handleQuantityChange(1)}
-              disabled={quantity >= remainingSlots || remainingSlots === 0 || isPurchasing}
+              disabled={isPurchasing}
               className="p-2 hover:bg-white/10 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="w-6 h-6 text-blue-500" />
@@ -244,13 +217,11 @@ export default function AreaDetailsPage() {
         {/* Buy Tile Button */}
         <button
           onClick={handleBuyTile}
-          disabled={remainingSlots === 0 || isPurchasing}
+          disabled={isPurchasing}
           className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors"
         >
           {isPurchasing ? (
             'Processing...'
-          ) : remainingSlots === 0 ? (
-            'Sold Out'
           ) : quantity > 1 ? (
             `Buy ${quantity} Tiles`
           ) : (
