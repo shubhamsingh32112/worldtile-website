@@ -13,6 +13,7 @@ export interface CreateOrderResponse {
   address?: string
   network?: string
   assignedSlots?: string[] // Slots assigned by backend
+  expiresAt?: string // Expiry timestamp
   message?: string
   status?: number // HTTP status code for error handling
   meta?: {
@@ -48,6 +49,7 @@ export interface Order {
   createdAt: string
   paidAt?: string
   landSlotIds: string[]
+  expiresAt?: string
 }
 
 export interface UserOrdersResponse {
@@ -78,6 +80,7 @@ export const orderService = {
         address: response.data.address,
         network: response.data.network,
         assignedSlots: response.data.assignedSlots,
+        expiresAt: response.data.expiresAt,
       }
     } catch (error: any) {
       const message = error.response?.data?.message || 'Failed to create order'
@@ -158,6 +161,25 @@ export const orderService = {
         message,
         orders: [],
         count: 0,
+      }
+    }
+  },
+
+  /**
+   * Get order by ID
+   */
+  async getOrderById(orderId: string): Promise<{ success: boolean; order?: Order; message?: string }> {
+    try {
+      const response = await api.get<{ success: boolean; order: Order }>(`/orders/${orderId}`)
+      return {
+        success: true,
+        order: response.data.order,
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Failed to fetch order'
+      return {
+        success: false,
+        message,
       }
     }
   },

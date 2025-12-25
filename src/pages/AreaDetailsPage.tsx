@@ -110,6 +110,7 @@ export default function AreaDetailsPage() {
           place: area.areaName,
           landSlotIds: orderResult.assignedSlots || [], // Use slots assigned by backend
           quantity,
+          expiresAt: orderResult.expiresAt, // Pass expiry timestamp for countdown
         },
       })
     } catch (error: any) {

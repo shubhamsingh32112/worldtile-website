@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { orderService } from '../services/orderService'
@@ -7,7 +7,7 @@ import GlassCard from '../components/GlassCard'
 import ErrorState from '../components/ErrorState'
 import { Copy, CheckCircle, Download, ArrowLeft } from 'lucide-react'
 
-type PaymentState = 'waiting' | 'checking' | 'confirmed'
+type PaymentState = 'waiting' | 'checking' | 'confirmed' | 'expired'
 
 interface PaymentPageLocationState {
   amount?: string
@@ -17,6 +17,7 @@ interface PaymentPageLocationState {
   place?: string
   landSlotIds?: string[]
   quantity?: number
+  expiresAt?: string
 }
 
 export default function PaymentPage() {
@@ -29,6 +30,8 @@ export default function PaymentPage() {
   const [paymentState, setPaymentState] = useState<PaymentState>('waiting')
   const [isVerifying, setIsVerifying] = useState(false)
   const [copiedAddress, setCopiedAddress] = useState(false)
+  const [timeLeft, setTimeLeft] = useState<number>(0)
+  const [orderStatus, setOrderStatus] = useState<string>('PENDING')
 
   const amount = state?.amount || '0'
   const address = state?.address || ''
@@ -37,6 +40,100 @@ export default function PaymentPage() {
   const place = state?.place || ''
   const quantity = state?.quantity || 1
   const landSlotIds = state?.landSlotIds || []
+  const expiresAtFromState = state?.expiresAt
+
+  // Handle expiry function - defined before useEffects that use it
+  const handleExpiry = async () => {
+    // Immediately mark UI as expired
+    setPaymentState('expired')
+    setOrderStatus('EXPIRED')
+    setTimeLeft(0)
+
+    // Trigger backend to clean up
+    if (orderId) {
+      try {
+        await orderService.autoVerifyPayment(orderId)
+      } catch (error) {
+        // Backend will handle expiry on next contact
+        console.error('Error during expiry cleanup:', error)
+      }
+    }
+
+    toast.error('Order expired. Tiles unlocked.')
+    setTimeout(() => {
+      navigate('/buy-land')
+    }, 2000)
+  }
+
+  // Fetch order details if expiresAt not in state
+  useEffect(() => {
+    const fetchOrderDetails = async () => {
+      if (!orderId || expiresAtFromState) return
+
+      try {
+        const result = await orderService.getOrderById(orderId)
+        if (result.success && result.order) {
+          if (result.order.expiresAt) {
+            const expiry = new Date(result.order.expiresAt).getTime()
+            const diff = expiry - Date.now()
+            if (diff > 0) {
+              setTimeLeft(diff)
+            } else {
+              // Already expired
+              handleExpiry()
+            }
+          }
+          if (result.order.status) {
+            setOrderStatus(result.order.status)
+            if (result.order.status === 'EXPIRED') {
+              setPaymentState('expired')
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch order details:', error)
+      }
+    }
+
+    fetchOrderDetails()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderId, expiresAtFromState])
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (!expiresAtFromState || paymentState === 'expired' || paymentState === 'confirmed') return
+
+    const expiry = new Date(expiresAtFromState).getTime()
+    const diff = expiry - Date.now()
+
+    if (diff <= 0) {
+      handleExpiry()
+      return
+    }
+
+    setTimeLeft(diff)
+
+    const intervalId = setInterval(() => {
+      const currentDiff = expiry - Date.now()
+
+      if (currentDiff <= 0) {
+        clearInterval(intervalId)
+        handleExpiry()
+      } else {
+        setTimeLeft(currentDiff)
+      }
+    }, 1000)
+
+    return () => clearInterval(intervalId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expiresAtFromState, paymentState])
+
+  const formatTime = (ms: number): string => {
+    const totalSeconds = Math.floor(ms / 1000)
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`
+  }
 
   const generateQRPayload = (): string => {
     return `tron:${address}?amount=${amount}`
@@ -85,7 +182,8 @@ export default function PaymentPage() {
           navigate('/deeds')
         }, 3000)
       } else if (status === 'EXPIRED') {
-        setPaymentState('waiting')
+        setPaymentState('expired')
+        setOrderStatus('EXPIRED')
         setIsVerifying(false)
         toast.error('Payment window expired. Slots have been released. Please place a new order.')
         setTimeout(() => {
@@ -162,6 +260,28 @@ export default function PaymentPage() {
           </div>
         </GlassCard>
 
+        {/* Expiry Timer */}
+        {expiresAtFromState && timeLeft > 0 && paymentState !== 'expired' && paymentState !== 'confirmed' && (
+          <GlassCard padding="p-4" backgroundColor="bg-red-500/10">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-400">Order expires in:</span>
+              <span className="text-red-500 font-bold text-lg">
+                {formatTime(timeLeft)}
+              </span>
+            </div>
+          </GlassCard>
+        )}
+
+        {/* Expired State */}
+        {paymentState === 'expired' && (
+          <GlassCard padding="p-4" backgroundColor="bg-red-500/20">
+            <div className="flex items-center gap-3">
+              <span className="text-red-500 font-bold text-lg">Order Expired</span>
+              <span className="text-sm text-gray-300">Tiles have been unlocked.</span>
+            </div>
+          </GlassCard>
+        )}
+
         {/* Payment Details Card */}
         <GlassCard padding="p-4">
           <h3 className="text-lg font-bold text-white mb-3">Payment Details</h3>
@@ -227,7 +347,7 @@ export default function PaymentPage() {
         </GlassCard>
 
         {/* Payment Verification */}
-        {paymentState !== 'confirmed' && (
+        {paymentState !== 'confirmed' && paymentState !== 'expired' && (
           <GlassCard padding="p-4">
             <h3 className="text-lg font-bold text-white mb-2">
               {paymentState === 'waiting' ? 'Waiting for Payment' : 'Checking Payment'}
@@ -244,7 +364,7 @@ export default function PaymentPage() {
             )}
             <button
               onClick={verifyPayment}
-              disabled={isVerifying}
+              disabled={isVerifying || paymentState === 'expired'}
               className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-colors"
             >
               {isVerifying ? 'Checking...' : "I'VE PAID"}
