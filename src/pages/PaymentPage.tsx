@@ -349,55 +349,6 @@ export default function PaymentPage() {
           </div>
         </GlassCard>
 
-        {/* Pay with Wallet */}
-        <GlassCard padding="p-4">
-          <h3 className="text-lg font-bold text-white mb-3 text-center">Pay With Wallet</h3>
-          <p className="text-xs text-gray-400 text-center mb-3">
-            Opens your crypto wallet with amount & address pre-filled.  
-            <br />Select <span className="text-red-400 font-bold">TRON / TRC20</span> network inside the wallet.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            <button
-              onClick={() => window.location.href = `tronlink://wallet/send?to=${address}&amount=${amount}`}
-              className="w-full py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
-            >
-              TronLink
-            </button>
-
-            <button
-              onClick={() => window.location.href = `trust://send?asset=USDT&address=${address}&amount=${amount}`}
-              className="w-full py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
-            >
-              TrustWallet
-            </button>
-
-            <button
-              onClick={() => window.location.href = `tpoutside://transfer?address=${address}&token=USDT&amount=${amount}`}
-              className="w-full py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
-            >
-              TokenPocket
-            </button>
-
-            <button
-              onClick={() => window.location.href = `bitkeep://send?address=${address}&amount=${amount}&token=USDT`}
-              className="w-full py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-lg transition-colors"
-            >
-              BitKeep / Bitget
-            </button>
-          </div>
-
-          <div className="mt-4 text-center">
-            <p className="text-xs text-gray-400 mb-1">Or open manually:</p>
-            <a
-              href={`tron:${address}?amount=${amount}`}
-              className="text-blue-400 underline text-sm break-all"
-            >
-              tron:{address}?amount={amount}
-            </a>
-          </div>
-        </GlassCard>
-
         {/* Payment Verification */}
         {paymentState !== 'confirmed' && paymentState !== 'expired' && (() => {
           const isInteractive = paymentState === 'waiting' || paymentState === 'checking'
