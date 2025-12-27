@@ -4,6 +4,7 @@ import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function AdminLayout() {
   const { user, loading } = useAuth()
+  const navigate = useNavigate()
 
   // Loading gate - prevent flicker
   if (loading) {

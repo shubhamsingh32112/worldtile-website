@@ -60,6 +60,23 @@ export default function Withdrawals() {
     },
   })
 
+  const markPaidMutation = useMutation({
+    mutationFn: ({ id, payoutTxHash, notes }: { id: string; payoutTxHash: string; notes?: string }) =>
+      adminService.markWithdrawalAsPaid(id, payoutTxHash, notes),
+    onSuccess: () => {
+      showToast('Withdrawal marked as paid', 'success')
+      queryClient.invalidateQueries({ queryKey: ['adminWithdrawals'] })
+      queryClient.invalidateQueries({ queryKey: ['adminStats'] })
+      setSelectedId(null)
+      setNotes('')
+      setPayoutTxHash('')
+      setActionType(null)
+    },
+    onError: (error: any) => {
+      showToast(error.message || 'Failed to mark withdrawal as paid', 'error')
+    },
+  })
+
   const handleAction = (id: string, type: 'approve' | 'reject' | 'markPaid') => {
     setSelectedId(id)
     setActionType(type)
@@ -273,11 +290,22 @@ export default function Withdrawals() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-slate-800 rounded-xl p-6 max-w-md w-full mx-4 border border-white/10">
             <h3 className="text-xl font-bold text-white mb-4">
-              {actionType === 'approve' ? 'Approve' : 'Reject'} Withdrawal
+              {actionType === 'approve' ? 'Approve' : actionType === 'reject' ? 'Reject' : 'Mark as Paid'} Withdrawal
             </h3>
             <p className="text-white/70 mb-4">
-              Are you sure you want to {actionType} this withdrawal request?
+              {actionType === 'markPaid'
+                ? 'Please enter the payout transaction hash to mark this withdrawal as paid.'
+                : `Are you sure you want to ${actionType} this withdrawal request?`}
             </p>
+            {actionType === 'markPaid' && (
+              <input
+                type="text"
+                value={payoutTxHash}
+                onChange={(e) => setPayoutTxHash(e.target.value)}
+                placeholder="Payout transaction hash (required)"
+                className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 mb-4 focus:outline-none focus:ring-2 focus:ring-purple-500"
+              />
+            )}
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -288,14 +316,16 @@ export default function Withdrawals() {
             <div className="flex gap-2">
               <button
                 onClick={confirmAction}
-                disabled={approveMutation.isPending || rejectMutation.isPending}
+                disabled={approveMutation.isPending || rejectMutation.isPending || markPaidMutation.isPending}
                 className={`flex-1 px-4 py-2 rounded-lg text-white transition ${
                   actionType === 'approve'
                     ? 'bg-green-600 hover:bg-green-700'
-                    : 'bg-red-600 hover:bg-red-700'
+                    : actionType === 'reject'
+                    ? 'bg-red-600 hover:bg-red-700'
+                    : 'bg-blue-600 hover:bg-blue-700'
                 } disabled:opacity-50`}
               >
-                {approveMutation.isPending || rejectMutation.isPending
+                {approveMutation.isPending || rejectMutation.isPending || markPaidMutation.isPending
                   ? 'Processing...'
                   : 'Confirm'}
               </button>
@@ -303,6 +333,7 @@ export default function Withdrawals() {
                 onClick={() => {
                   setSelectedId(null)
                   setNotes('')
+                  setPayoutTxHash('')
                   setActionType(null)
                 }}
                 className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition"
