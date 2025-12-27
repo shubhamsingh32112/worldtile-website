@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { adminService } from '../../services/adminService'
+import { adminService, Agent } from '../../services/adminService'
 import LoadingSpinner from '../../components/LoadingSpinner'
 import ErrorState from '../../components/ErrorState'
 
@@ -33,8 +33,8 @@ export default function Agents() {
     return <ErrorState message="Failed to load agents" />
   }
 
-  // Because backend returns agents directly at the root of response
-  const agents = data?.agents || []
+  // PaginatedResponse<Agent> has data property containing the array
+  const agents = data?.data || []
   const pagination = data?.pagination || { page: 1, totalPages: 1, total: 0 }
 
   return (
@@ -95,7 +95,7 @@ export default function Agents() {
                   </td>
                 </tr>
               ) : (
-                agents.map((agent) => (
+                agents.map((agent: Agent) => (
                   <tr key={agent.id} className="hover:bg-white/5">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-white font-medium">{agent.name}</div>
