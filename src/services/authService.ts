@@ -21,6 +21,7 @@ export interface User {
   photoUrl?: string
   firebaseUid?: string
   walletAddress?: string
+  role?: 'USER' | 'AGENT' | 'ADMIN'
 }
 
 export interface AuthResponse {

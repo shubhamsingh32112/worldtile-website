@@ -18,6 +18,12 @@ import TermsAndConditions from './pages/terms_and_condition'
 import AgentProgram from './pages/AgentProgram'
 import Support from './pages/Support'
 import ContactUs from './pages/ContactUs'
+import AdminLayout from './layouts/AdminLayout'
+import Dashboard from './pages/admin/Dashboard'
+import Payments from './pages/admin/Payments'
+import Withdrawals from './pages/admin/Withdrawals'
+import Earnings from './pages/admin/Earnings'
+import Agents from './pages/admin/Agents'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
@@ -131,6 +137,15 @@ function AppRouter() {
             </ProtectedRoute>
           }
         />
+      </Route>
+
+      {/* ADMIN ROUTES (separate layout) */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<Dashboard />} />
+        <Route path="payments" element={<Payments />} />
+        <Route path="withdrawals" element={<Withdrawals />} />
+        <Route path="earnings" element={<Earnings />} />
+        <Route path="agents" element={<Agents />} />
       </Route>
     </Routes>
   )

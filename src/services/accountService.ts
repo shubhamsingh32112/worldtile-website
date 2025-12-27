@@ -10,7 +10,7 @@ export interface ReferralStats {
   totalReferrals: number
   totalEarningsUSDT: string
 }
-
+//s
 export interface UserAccount {
   name: string
   email: string
@@ -50,7 +50,7 @@ export class AccountException extends Error {
   constructor(
     message: string,
     public statusCode?: number,
-    public isUnauthorized = false
+    public isUnauthorized = false,
   ) {
     super(message)
     this.name = 'AccountException'
@@ -64,14 +64,20 @@ function getInitials(name: string): string {
   if (parts.length === 1) {
     return parts[0].substring(0, 1).toUpperCase()
   }
-  return (parts[0].substring(0, 1) + parts[parts.length - 1].substring(0, 1)).toUpperCase()
+  return (
+    parts[0].substring(0, 1) + parts[parts.length - 1].substring(0, 1)
+  ).toUpperCase()
 }
 
 // Helper function to transform backend response to UserAccount
 function transformAccountData(data: any): UserAccount {
-  const earningsAsDouble = parseFloat(data.referralStats.totalEarningsUSDT || '0')
-  const commissionRatePercent = Math.round((data.agentProfile.commissionRate || 0) * 100)
-  
+  const earningsAsDouble = parseFloat(
+    data.referralStats.totalEarningsUSDT || '0',
+  )
+  const commissionRatePercent = Math.round(
+    (data.agentProfile.commissionRate || 0) * 100,
+  )
+
   return {
     ...data,
     isReferred: !!data.referredBy,
@@ -92,11 +98,11 @@ export const accountService = {
     } catch (error: any) {
       const statusCode = error.response?.status
       const message = error.response?.data?.message || 'Failed to fetch account'
-      
+
       if (statusCode === 401) {
         throw new AccountException(message, statusCode, true)
       }
-      
+
       throw new AccountException(message, statusCode)
     }
   },
@@ -109,7 +115,8 @@ export const accountService = {
       const response = await api.put<any>('/users/me', request)
       return transformAccountData(response.data)
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Failed to update profile'
+      const message =
+        error.response?.data?.message || 'Failed to update profile'
       throw new AccountException(message, error.response?.status)
     }
   },
@@ -117,27 +124,33 @@ export const accountService = {
   /**
    * Add referral code to account
    */
-  async addReferralCode(referralCode: string): Promise<AddReferralCodeResponse> {
+  async addReferralCode(
+    referralCode: string,
+  ): Promise<AddReferralCodeResponse> {
     try {
       const normalizedCode = referralCode.trim().toUpperCase()
-      const response = await api.post<{ success: boolean; message?: string }>('/users/add-referral', {
-        referralCode: normalizedCode,
-      })
+      const response = await api.post<{ success: boolean; message?: string }>(
+        '/users/add-referral',
+        {
+          referralCode: normalizedCode,
+        },
+      )
       return {
         success: response.data.success ?? true,
         message: response.data.message,
       }
     } catch (error: any) {
       const statusCode = error.response?.status
-      const message = error.response?.data?.message || 'Failed to add referral code'
-      
+      const message =
+        error.response?.data?.message || 'Failed to add referral code'
+
       if (statusCode === 403) {
         return {
           success: false,
           message: 'Referral code already set or invalid',
         }
       }
-      
+
       return {
         success: false,
         message,
