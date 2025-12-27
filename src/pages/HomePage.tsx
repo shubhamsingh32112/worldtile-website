@@ -134,7 +134,7 @@ export default function HomePage() {
       The world is moving online. Major brands and investors are claiming space in the Metaverse.
       Owning land today is securing your future in the digital economy.
     </p>
-    <p className="text-sm font-semibold text-purple-400 mt-2">💰 $100 Per Acre (Phase 1 Launch Price)</p>
+    <p className="text-sm font-semibold text-purple-400 mt-2">💰 $110 Per 43,560 sqft</p>
   </GlassCard>
 
   {/* Card 2 */}
@@ -181,7 +181,7 @@ export default function HomePage() {
       Don’t wait for “someday.” Build today.
     </p>
     <button onClick={handleBuyLandClick} className="w-full py-3 bg-purple-600  rounded-xl text-white font-semibold shadow-lg hover:scale-105 transition">
-      Secure Your Land @ $100/Acre
+      Secure Your Land
     </button>
   </GlassCard>
 
@@ -218,7 +218,7 @@ export default function HomePage() {
       <div className="mb-4">
         <GlassCard padding="p-6" backgroundColor="bg-white/3 opacity-75">
           <div className="flex items-center gap-2 mb-5">
-            <h2 className="text-xl font-bold text-white">Markets to Invest In</h2>
+            <h2 className="text-xl font-bold text-white">Land Value Progression</h2>
             <Lock className="w-5 h-5 text-gray-400" />
           </div>
           
@@ -282,6 +282,14 @@ export default function HomePage() {
   {
     q: "What makes World Tile different from other virtual worlds?",
     a: `World Tile blends a digital map with real-world relevance — meetings, events, entertainment, commerce and branded experiences. Accessible via web, mobile, and future AR/VR support.`
+  },
+  {
+    q: "Why are INR payments not supported?",
+    a: `World Tile currently accepts payments only in USDT to protect users and align with Indian crypto compliance guidelines during Phase-1. Since crypto regulations are still evolving, avoiding direct INR collection reduces regulatory friction and payment issues for users. Using USDT ensures every transaction is recorded on the blockchain, making payments transparent, verifiable, and tamper-proof, so users can independently track and confirm their purchase without delays, chargebacks, or disputes.`
+  },
+  {
+    q: "If I don’t have USDT, how can I pay?",
+    a: `If you don’t already have USDT, you can easily buy it using INR through popular crypto apps and exchanges in India. Simply create an account on any supported platform, purchase USDT using UPI or bank transfer, and then send the USDT to the provided wallet address (TRC20 only) to complete your payment. This process usually takes just a few minutes, even for first-time users.`
   },
 ].map((item, i) => (
   <details
