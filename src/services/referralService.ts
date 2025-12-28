@@ -2,6 +2,8 @@ import api from './api'
 
 export interface ReferralSummary {
   totalEarningsUSDT: string
+  pendingEarningsUSDT?: string
+  paidEarningsUSDT?: string
   totalReferrals: number
   commissionRate: number
   agentTitle?: string
@@ -28,6 +30,21 @@ export interface ReferralEarningsResponse {
 export interface WithdrawalRequest {
   amount: string
   walletAddress: string
+  fullName?: string
+  email?: string
+  phoneNumber?: string
+  saveDetails?: boolean
+}
+
+export interface WithdrawalHistoryItem {
+  id: string
+  amount: string
+  walletAddress: string
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED'
+  adminNotes?: string
+  payoutTxHash?: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface WithdrawalResponse {
@@ -89,6 +106,24 @@ export const referralService = {
       return {
         success: false,
         message,
+      }
+    }
+  },
+
+  /**
+   * Get withdrawal history
+   */
+  async getWithdrawalHistory(): Promise<{ success: boolean; data: WithdrawalHistoryItem[] }> {
+    try {
+      const response = await api.get<{
+        success: boolean
+        data: WithdrawalHistoryItem[]
+      }>('/referrals/withdrawals/history')
+      return response.data
+    } catch (error: any) {
+      return {
+        success: false,
+        data: [],
       }
     }
   },

@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQueryClient, useMutation } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useUserAccount } from '../hooks/useUserAccount'
 import { useUserLands } from '../hooks/useUserLands'
 import { accountService } from '../services/accountService'
-import { supportService } from '../services/supportService'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import GlassCard from '../components/GlassCard'
 import StatCard from '../components/StatCard'
 import ErrorState from '../components/ErrorState'
 import AccountPageSkeleton from '../components/AccountPageSkeleton'
-import { Check, Lock, LogOut, Grid3x3, DollarSign, HelpCircle, MessageCircle } from 'lucide-react'
+import { Check, Lock, LogOut, Grid3x3, DollarSign, ArrowLeft } from 'lucide-react'
 
-export default function AccountPage() {
+export default function ProfilePage() {
   const navigate = useNavigate()
   const { logout } = useAuth()
   const toast = useToast()
@@ -29,8 +28,6 @@ export default function AccountPage() {
   const [originalPhone, setOriginalPhone] = useState('')
   const [referralCode, setReferralCode] = useState('')
   const [isAddingReferral, setIsAddingReferral] = useState(false)
-  const [showSupportModal, setShowSupportModal] = useState(false)
-  const [supportMessage, setSupportMessage] = useState('')
 
   // Update form values when account data loads
   useEffect(() => {
@@ -148,40 +145,6 @@ export default function AccountPage() {
     }
   }
 
-  const supportMutation = useMutation({
-    mutationFn: async (message: string) => {
-      return await supportService.submitUserQuery({
-        message,
-      })
-    },
-    onSuccess: () => {
-      toast.success('📝 Support request sent to admin')
-      setShowSupportModal(false)
-      setSupportMessage('')
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'Failed to submit support request')
-    },
-  })
-
-  const handleSupportSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!supportMessage.trim()) {
-      toast.error('Please describe your issue')
-      return
-    }
-
-    supportMutation.mutate(supportMessage)
-  }
-
-  const openWhatsAppSupport = () => {
-    const phoneNumber = '+918296945508'
-    const whatsappUrl = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}`
-    window.open(whatsappUrl, '_blank')
-  }
-
-
   if (isLoading) {
     return <AccountPageSkeleton />
   }
@@ -204,8 +167,15 @@ export default function AccountPage() {
 
   return (
     <div className="mx-auto w-full max-w-[1000px] px-4 md:px-6">
-      {/* Logout button */}
-      <div className="flex justify-end mb-4 px-4">
+      {/* Header with back button and logout */}
+      <div className="flex justify-between items-center mb-4 px-4">
+        <button
+          onClick={() => navigate('/settings')}
+          className="flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back
+        </button>
         <button
           onClick={logout}
           className="flex items-center gap-2 px-4 py-2 bg-red-600/80 hover:bg-red-600 text-white rounded-xl font-semibold transition-colors"
@@ -375,83 +345,7 @@ export default function AccountPage() {
             color="text-blue-400"
           />
         </div>
-
-        {/* Support Section */}
-        <GlassCard padding="p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <HelpCircle className="w-6 h-6 text-blue-400" />
-            <h3 className="text-lg font-bold text-white">Support</h3>
-          </div>
-          <p className="text-sm text-gray-400 mb-4">Need help? Contact our support team</p>
-          <button
-            onClick={() => setShowSupportModal(true)}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
-          >
-            <HelpCircle className="w-5 h-5" />
-            Contact Support
-          </button>
-        </GlassCard>
       </div>
-
-      {/* Support Modal */}
-      {showSupportModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-xl p-6 max-w-md w-full border border-white/10">
-            <h3 className="text-xl font-bold text-white mb-4">Contact Support</h3>
-            <form onSubmit={handleSupportSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-white/70 mb-1">
-                  Describe your issue *
-                </label>
-                <textarea
-                  value={supportMessage}
-                  onChange={(e) => setSupportMessage(e.target.value)}
-                  required
-                  rows={5}
-                  placeholder="Please describe your issue in detail..."
-                  className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              
-              {/* WhatsApp Option */}
-              <div className="flex items-center gap-2 pt-2 pb-2">
-                <div className="flex-1 border-t border-white/10"></div>
-                <span className="text-sm text-white/50">or</span>
-                <div className="flex-1 border-t border-white/10"></div>
-              </div>
-              
-              <button
-                type="button"
-                onClick={openWhatsAppSupport}
-                className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
-              >
-                <MessageCircle className="w-5 h-5" />
-                Chat on WhatsApp
-              </button>
-              
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="submit"
-                  disabled={supportMutation.isPending}
-                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition disabled:opacity-50"
-                >
-                  {supportMutation.isPending ? 'Submitting...' : 'Submit'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowSupportModal(false)
-                    setSupportMessage('')
-                  }}
-                  className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

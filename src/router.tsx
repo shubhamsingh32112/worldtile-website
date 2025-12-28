@@ -11,6 +11,10 @@ import EarnPage from './pages/EarnPage'
 import PaymentPage from './pages/PaymentPage'
 import AreaDetailsPage from './pages/AreaDetailsPage'
 import AccountPage from './pages/AccountPage'
+import SettingsPage from './pages/SettingsPage'
+import ProfilePage from './pages/ProfilePage'
+import KYCPage from './pages/KYCPage'
+import SettingsSupportPage from './pages/SettingsSupportPage'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import LoadingSpinner from './components/LoadingSpinner'
 import RefundPolicy from './pages/refundPolicy'
@@ -24,6 +28,7 @@ import Payments from './pages/admin/Payments'
 import Withdrawals from './pages/admin/Withdrawals'
 import Earnings from './pages/admin/Earnings'
 import Agents from './pages/admin/Agents'
+import AdminSupport from './pages/admin/Support'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
@@ -130,6 +135,46 @@ function AppRouter() {
           }
         />
         <Route
+          path="settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="settings/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="settings/kyc"
+          element={
+            <ProtectedRoute>
+              <KYCPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="settings/support"
+          element={
+            <ProtectedRoute>
+              <SettingsSupportPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="settings/terms"
+          element={
+            <ProtectedRoute>
+              <TermsAndConditions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="payment/:orderId"
           element={
             <ProtectedRoute>
@@ -146,6 +191,7 @@ function AppRouter() {
         <Route path="withdrawals" element={<Withdrawals />} />
         <Route path="earnings" element={<Earnings />} />
         <Route path="agents" element={<Agents />} />
+        <Route path="support" element={<AdminSupport />} />
       </Route>
     </Routes>
   )

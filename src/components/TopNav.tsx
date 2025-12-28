@@ -6,7 +6,7 @@ const navItems = [
   { path: '/buy-land', label: 'Buy Land' },
   { path: '/deeds', label: 'Deeds' },
   { path: '/earn', label: 'Earn' },
-  { path: '/account', label: 'Account' },
+  { path: '/settings', label: 'Settings' },
 ]
 
 export default function TopNav() {

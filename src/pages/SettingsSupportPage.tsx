@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { supportService } from '../services/supportService'
@@ -6,21 +6,11 @@ import { useToast } from '../context/ToastContext'
 import GlassCard from '../components/GlassCard'
 import { ArrowLeft, HelpCircle, MessageCircle } from 'lucide-react'
 
-export default function ContactUs() {
+export default function SettingsSupportPage() {
   const navigate = useNavigate()
   const toast = useToast()
   const [showSupportModal, setShowSupportModal] = useState(false)
   const [supportMessage, setSupportMessage] = useState('')
-
-  // Scroll to top on mount
-  useEffect(() => {
-    const scrollContainer = document.getElementById('app-scroll-container')
-    if (scrollContainer) {
-      scrollContainer.scrollTo({ top: 0, behavior: 'smooth' })
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
-  }, [])
 
   const supportMutation = useMutation({
     mutationFn: async (message: string) => {
@@ -60,7 +50,7 @@ export default function ContactUs() {
       {/* Header with back button */}
       <div className="flex justify-between items-center mb-6 px-4">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/settings')}
           className="flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
