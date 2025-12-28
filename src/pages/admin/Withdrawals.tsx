@@ -32,7 +32,7 @@ export default function Withdrawals() {
     mutationFn: ({ id, notes }: { id: string; notes?: string }) =>
       adminService.approveWithdrawal(id, notes),
     onSuccess: () => {
-      showToast('Withdrawal approved successfully', 'success')
+      showToast('👍 Withdrawal approved', 'success')
       queryClient.invalidateQueries({ queryKey: ['adminWithdrawals'] })
       queryClient.invalidateQueries({ queryKey: ['adminStats'] })
       setSelectedId(null)
@@ -48,7 +48,7 @@ export default function Withdrawals() {
     mutationFn: ({ id, notes }: { id: string; notes?: string }) =>
       adminService.rejectWithdrawal(id, notes),
     onSuccess: () => {
-      showToast('Withdrawal rejected', 'success')
+      showToast('🚫 Withdrawal rejected', 'success')
       queryClient.invalidateQueries({ queryKey: ['adminWithdrawals'] })
       queryClient.invalidateQueries({ queryKey: ['adminStats'] })
       setSelectedId(null)
@@ -64,7 +64,7 @@ export default function Withdrawals() {
     mutationFn: ({ id, payoutTxHash, notes }: { id: string; payoutTxHash: string; notes?: string }) =>
       adminService.markWithdrawalAsPaid(id, payoutTxHash, notes),
     onSuccess: () => {
-      showToast('Withdrawal marked as paid', 'success')
+      showToast('💳 Marked as paid', 'success')
       queryClient.invalidateQueries({ queryKey: ['adminWithdrawals'] })
       queryClient.invalidateQueries({ queryKey: ['adminStats'] })
       setSelectedId(null)
@@ -164,16 +164,19 @@ export default function Withdrawals() {
             <thead className="bg-white/5">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
-                  Agent
+                  User
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
-                  Amount
+                  Email
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
+                  Phone
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
                   Wallet
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
-                  Date
+                  Amount
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-white/70 uppercase tracking-wider">
                   Status
@@ -186,7 +189,7 @@ export default function Withdrawals() {
             <tbody className="divide-y divide-white/10">
               {withdrawals.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-white/50">
+                  <td colSpan={7} className="px-6 py-8 text-center text-white/50">
                     No withdrawals found
                   </td>
                 </tr>
@@ -194,22 +197,24 @@ export default function Withdrawals() {
                 withdrawals.map((withdrawal) => (
                   <tr key={withdrawal.id} className="hover:bg-white/5">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-white">{withdrawal.agent.name}</div>
-                      <div className="text-sm text-white/50">{withdrawal.agent.email}</div>
+                      <div className="text-sm text-white font-medium">{withdrawal.agent.name}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                      ${parseFloat(withdrawal.amount).toLocaleString('en-US', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-white/70">{withdrawal.agent.email}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-white/70">{withdrawal.agent.phoneNumber || '-'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-white/70 font-mono max-w-[200px] truncate">
                         {withdrawal.walletAddress}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white/70">
-                      {new Date(withdrawal.createdAt).toLocaleDateString()}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                      {parseFloat(withdrawal.amount).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })} USDT
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span

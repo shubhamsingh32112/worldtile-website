@@ -30,8 +30,14 @@ export default function Footer() {
   ]
 
   const handleLinkClick = (path: string) => {
-    // Navigate to the link path or handle routing
-    // For now, we'll just use navigate or you can implement actual pages
+    // Scroll to top before navigating
+    const scrollContainer = document.getElementById('app-scroll-container')
+    if (scrollContainer) {
+      scrollContainer.scrollTo({ top: 0, behavior: 'smooth' })
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+    // Navigate to the link path
     navigate(path)
   }
 

@@ -1,9 +1,37 @@
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import LegalLayout from "@/components/legal/LegalLayout";
 import PolicySection from "@/components/legal/PolicySection";
+import { ArrowLeft } from 'lucide-react'
 
 export default function TermsAndConditions() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const isFromSettings = location.pathname === '/settings/terms'
+
+  // Scroll to top on mount
+  useEffect(() => {
+    const scrollContainer = document.getElementById('app-scroll-container')
+    if (scrollContainer) {
+      scrollContainer.scrollTo({ top: 0, behavior: 'smooth' })
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [])
+
   return (
-    <LegalLayout title="Terms and Conditions">
+    <div className="min-h-screen bg-black">
+      {/* Always show back button */}
+      <div className="mx-auto max-w-[900px] px-4 pt-8 pb-4">
+        <button
+          onClick={() => isFromSettings ? navigate('/settings') : navigate(-1)}
+          className="flex items-center gap-2 px-4 py-2 text-white/70 hover:text-white transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back
+        </button>
+      </div>
+      <LegalLayout title="Terms and Conditions">
       <PolicySection title="Introduction">
         <p>
           Welcome to World Tile (“World Tile”, “we”, “our”, “us”). These Terms
@@ -216,6 +244,7 @@ export default function TermsAndConditions() {
           🌐 https://worldtile.io
         </p>
       </PolicySection>
-    </LegalLayout>
+      </LegalLayout>
+    </div>
   )
 }

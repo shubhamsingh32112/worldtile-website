@@ -17,6 +17,10 @@ export interface UserAccount {
   phoneNumber?: string | null
   photoUrl?: string | null
   walletAddress?: string | null
+  fullName?: string | null
+  tronWalletAddress?: string | null
+  savedWithdrawalDetails?: boolean
+  userPendingMessage?: string | null
   referralCode?: string | null
   referredBy?: string | null
   agentProfile: AgentProfile

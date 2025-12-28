@@ -38,6 +38,7 @@ export interface Withdrawal {
     id: string
     name: string
     email: string
+    phoneNumber?: string
     walletAddress?: string
   }
   amount: string
@@ -254,5 +255,55 @@ export const adminService = {
     }>('/admin/users/agents', { params })
     return response.data
   },
+
+  /**
+   * Get support tickets
+   */
+  async getSupportTickets(params?: {
+    page?: number
+    limit?: number
+    status?: string
+  }): Promise<{ success: boolean; data: PaginatedResponse<SupportTicket> }> {
+    const response = await api.get<{
+      success: boolean
+      data: PaginatedResponse<SupportTicket>
+    }>('/admin/support/tickets', { params })
+    return response.data
+  },
+
+  /**
+   * Resolve a support ticket
+   */
+  async resolveSupportTicket(
+    ticketId: string,
+    response?: string
+  ): Promise<{ success: boolean; message: string }> {
+    const apiResponse = await api.patch<{ success: boolean; message: string }>(
+      `/admin/support/${ticketId}/resolve`,
+      { response }
+    )
+    return apiResponse.data
+  },
+}
+
+export interface SupportTicket {
+  id: string
+  user: {
+    id: string
+    name: string
+    email: string
+  }
+  withdrawalId?: string
+  message: string
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED'
+  adminResponse?: string
+  respondedBy?: {
+    id: string
+    name: string
+    email: string
+  }
+  respondedAt?: string
+  createdAt: string
+  updatedAt: string
 }
 

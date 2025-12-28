@@ -26,6 +26,7 @@ export default function AdminLayout() {
     { path: '/admin/withdrawals', label: 'Withdrawals' },
     { path: '/admin/earnings', label: 'Earnings' },
     { path: '/admin/agents', label: 'Agents' },
+    { path: '/admin/support', label: 'Support' },
   ]
 
   return (
