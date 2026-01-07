@@ -106,7 +106,7 @@ function AppRouter() {
           path="deeds"
           element={
             <ProtectedRoute>
-              <DeedsPage />
+              <Navigate to="/settings/deeds" replace />
             </ProtectedRoute>
           }
         />
@@ -171,6 +171,14 @@ function AppRouter() {
           element={
             <ProtectedRoute>
               <TermsAndConditions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="settings/deeds"
+          element={
+            <ProtectedRoute>
+              <DeedsPage />
             </ProtectedRoute>
           }
         />

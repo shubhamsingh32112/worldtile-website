@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import GlassCard from '../components/GlassCard'
-import { User, Shield, HelpCircle, FileText, ChevronRight, Lock } from 'lucide-react'
+import SettingsWallet from '../components/SettingsWallet'
+import { User, Shield, HelpCircle, FileText, ChevronRight, Lock, ScrollText } from 'lucide-react'
 
 export default function SettingsPage() {
   const navigate = useNavigate()
@@ -11,6 +12,13 @@ export default function SettingsPage() {
       label: 'Profile',
       icon: User,
       path: '/settings/profile',
+      locked: false,
+    },
+    {
+      id: 'deeds',
+      label: 'Deeds',
+      icon: ScrollText,
+      path: '/settings/deeds',
       locked: false,
     },
     {
@@ -44,6 +52,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="space-y-3 px-4">
+        <SettingsWallet />
         {settingsOptions.map((option) => {
           const Icon = option.icon
           return (

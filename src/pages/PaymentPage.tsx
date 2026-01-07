@@ -181,7 +181,7 @@ export default function PaymentPage() {
 
         // Auto-redirect to deed page after delay
         setTimeout(() => {
-          navigate('/deeds')
+          navigate('/settings/deeds')
         }, 3000)
       } else if (status === 'EXPIRED') {
         // Network-sanity protection: backend says expired, sync frontend immediately
