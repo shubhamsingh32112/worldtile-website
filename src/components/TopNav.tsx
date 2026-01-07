@@ -1,5 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import GooeyNav from './GooeyNav'
+import WalletConnectButton from './WalletConnectButton'
 
 const navItems = [
   { path: '/home', label: 'Home' },
@@ -39,18 +40,26 @@ export default function TopNav() {
   }
 
   return (
-    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 max-w-full px-2">
-      <GooeyNav
-        items={navItems.map(item => ({ label: item.label }))}
-        activeIndex={activeIndex >= 0 ? activeIndex : undefined}
-        onItemClick={handleNavClick}
-        particleCount={15}
-        particleDistances={[90, 10]}
-        particleR={100}
-        animationTime={600}
-        timeVariance={300}
-        colors={[1, 2, 3, 1, 2, 3, 1, 4]}
-      />
+    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-6xl px-4">
+      <div className="flex items-center justify-between gap-4">
+        {/* Center nav */}
+        <GooeyNav
+          items={navItems.map(item => ({ label: item.label }))}
+          activeIndex={activeIndex >= 0 ? activeIndex : undefined}
+          onItemClick={handleNavClick}
+          particleCount={15}
+          particleDistances={[90, 10]}
+          particleR={100}
+          animationTime={600}
+          timeVariance={300}
+          colors={[1, 2, 3, 1, 2, 3, 1, 4]}
+        />
+
+        {/* Right-side wallet button */}
+        <div className="shrink-0">
+          <WalletConnectButton />
+        </div>
+      </div>
     </nav>
   )
 }

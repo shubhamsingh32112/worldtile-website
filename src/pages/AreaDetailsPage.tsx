@@ -54,13 +54,7 @@ export default function AreaDetailsPage() {
   const handleBuyTile = async () => {
     if (!area || !areaKey) return
 
-    // Check authentication
-    const token = localStorage.getItem('token')
-    if (!token) {
-      toast.warning('Please login to purchase tiles')
-      navigate('/login')
-      return
-    }
+    // Authentication is handled by ProtectedRoute - wallet must be connected
 
     if (quantity < 1) {
       toast.warning('Please select at least 1 tile')

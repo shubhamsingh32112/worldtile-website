@@ -1,13 +1,15 @@
 import { Outlet, NavLink, useNavigate, Navigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useActiveAccount } from 'thirdweb/react'
+import { useUserAccount } from '../hooks/useUserAccount'
 import LoadingSpinner from '../components/LoadingSpinner'
 
 export default function AdminLayout() {
-  const { user, loading } = useAuth()
+  const activeAccount = useActiveAccount()
+  const { data: user, isLoading } = useUserAccount()
   const navigate = useNavigate()
 
   // Loading gate - prevent flicker
-  if (loading) {
+  if (isLoading || !activeAccount) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <LoadingSpinner />

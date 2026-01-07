@@ -1,10 +1,12 @@
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { AuthProvider } from '../context/AuthContext'
+import { ThirdwebProvider } from 'thirdweb/react'
+import { polygon } from 'thirdweb/chains'
 import { AppBootstrapProvider } from '../context/AppBootstrapContext'
 import { ToastProvider } from '../context/ToastContext'
 import AppRouter from '../router'
 import InitialLoader from '../components/InitialLoader'
+import { thirdwebClient } from '@/lib/thirdwebClient'
 
 // Create a client with default options for caching
 const queryClient = new QueryClient({
@@ -23,15 +25,18 @@ function App() {
     <>
       <InitialLoader />
       <BrowserRouter>
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider>
+      <ThirdwebProvider
+        activeChain={polygon}
+        client={thirdwebClient}
+      >
+          <QueryClientProvider client={queryClient}>
             <AppBootstrapProvider>
               <ToastProvider>
                 <AppRouter />
               </ToastProvider>
             </AppBootstrapProvider>
-          </AuthProvider>
-        </QueryClientProvider>
+          </QueryClientProvider>
+        </ThirdwebProvider>
       </BrowserRouter>
     </>
   )

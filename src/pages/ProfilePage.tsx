@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
+import { useActiveAccount, useDisconnect } from 'thirdweb/react'
 import { useUserAccount } from '../hooks/useUserAccount'
 import { useUserLands } from '../hooks/useUserLands'
 import { accountService } from '../services/accountService'
-import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import GlassCard from '../components/GlassCard'
 import StatCard from '../components/StatCard'
@@ -14,7 +14,8 @@ import { Check, Lock, LogOut, Grid3x3, DollarSign, ArrowLeft } from 'lucide-reac
 
 export default function ProfilePage() {
   const navigate = useNavigate()
-  const { logout } = useAuth()
+  const { disconnect } = useDisconnect()
+  const activeAccount = useActiveAccount()
   const toast = useToast()
   const queryClient = useQueryClient()
   const { data: account, isLoading, error } = useUserAccount()
@@ -42,10 +43,12 @@ export default function ProfilePage() {
   // Handle unauthorized errors
   useEffect(() => {
     if (error && (error as any).isUnauthorized) {
-      logout()
-      navigate('/login')
+      if (activeAccount) {
+        disconnect(activeAccount)
+      }
+      navigate('/home')
     }
-  }, [error, logout, navigate])
+  }, [error, activeAccount, disconnect, navigate])
 
   const loadAccountData = async () => {
     await queryClient.invalidateQueries({ queryKey: ['userAccount'] })
@@ -177,11 +180,15 @@ export default function ProfilePage() {
           Back
         </button>
         <button
-          onClick={logout}
+          onClick={() => {
+            if (activeAccount) {
+              disconnect(activeAccount)
+            }
+          }}
           className="flex items-center gap-2 px-4 py-2 bg-red-600/80 hover:bg-red-600 text-white rounded-xl font-semibold transition-colors"
         >
           <LogOut className="w-4 h-4" />
-          Logout
+          Disconnect
         </button>
       </div>
 

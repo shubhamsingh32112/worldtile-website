@@ -1,8 +1,6 @@
 import { Routes, Route, Navigate, useSearchParams } from 'react-router-dom'
-import { useAuth } from './context/AuthContext'
+import { useActiveAccount } from 'thirdweb/react'
 import AppShell from './layouts/AppShell'
-import LoginPage from './pages/auth/LoginPage'
-import SignupPage from './pages/auth/SignupPage'
 import HomePage from './pages/HomePage'
 import BuyLandPage from './pages/BuyLandPage'
 import DeedsPage from './pages/DeedsPage'
@@ -31,10 +29,10 @@ import Agents from './pages/admin/Agents'
 import AdminSupport from './pages/admin/Support'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth()
+  const account = useActiveAccount()
   
-  if (!user) {
-    return <Navigate to="/login" replace />
+  if (!account) {
+    return <Navigate to="/home" replace />
   }
   
   return <>{children}</>
@@ -42,38 +40,25 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function RootRedirect() {
   const [searchParams] = useSearchParams()
-  const { user } = useAuth()
+  const account = useActiveAccount()
   const refCode = searchParams.get('ref')
   
-  // If there's a ref parameter and user is not logged in, redirect to signup with it
-  if (refCode && !user) {
-    return <Navigate to={`/signup?ref=${refCode}`} replace />
+  // Store referral code in localStorage if present
+  if (refCode) {
+    localStorage.setItem('referralCode', refCode)
   }
   
-  // If there's a ref parameter but user is logged in, redirect to home (they don't need signup)
-  if (refCode && user) {
-    return <Navigate to="/home" replace />
-  }
-  
-  // Otherwise, redirect to home
+  // Redirect to home
   return <Navigate to="/home" replace />
 }
 
 function AppRouter() {
-  const { user, loading } = useAuth()
-
-  if (loading) {
-    return <LoadingSpinner />
-  }
+  // No loading state needed - thirdweb handles it internally
 
   return (
     <Routes>
       {/* REF + ROOT HANDLER (no AppShell) */}
       <Route path="/" element={<RootRedirect />} />
-
-      {/* AUTH ROUTES (no AppShell) */}
-      <Route path="/login" element={user ? <Navigate to="/home" replace /> : <LoginPage />} />
-      <Route path="/signup" element={user ? <Navigate to="/home" replace /> : <SignupPage />} />
 
       {/* ALL OTHER ROUTES UNDER APPSHELL */}
       <Route element={<AppShell />}>

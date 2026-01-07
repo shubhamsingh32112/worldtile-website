@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
-import { useAuth } from './AuthContext'
+import { useActiveAccount } from 'thirdweb/react'
 import { userService, type UserStats } from '../services/userService'
+import { useUserSync } from '../hooks/useUserSync'
 
 interface AppBootstrapContextType {
   userStats: UserStats | null
@@ -23,16 +24,18 @@ interface AppBootstrapProviderProps {
 }
 
 export const AppBootstrapProvider: React.FC<AppBootstrapProviderProps> = ({ children }) => {
-  const { user } = useAuth()
+  const account = useActiveAccount()
+  const isAuthed = useUserSync() // Sync user with backend when wallet connects
+  
   const [userStats, setUserStats] = useState<UserStats | null>(null)
   const [isLoadingStats, setIsLoadingStats] = useState(true)
   const [hasLoaded, setHasLoaded] = useState(false)
 
   const loadStats = useCallback(async () => {
-    if (!user) {
+    if (!account || !isAuthed) {
       setUserStats(null)
       setIsLoadingStats(false)
-      setHasLoaded(true)
+      setHasLoaded(false)
       return
     }
 
@@ -58,31 +61,30 @@ export const AppBootstrapProvider: React.FC<AppBootstrapProviderProps> = ({ chil
       setIsLoadingStats(false)
       setHasLoaded(true)
     }
-  }, [user])
+  }, [account, isAuthed])
 
   const refreshStats = useCallback(async () => {
-    if (!user) return
+    if (!account || !isAuthed) return
     setIsLoadingStats(true)
     await loadStats()
-  }, [user, loadStats])
+  }, [account, isAuthed, loadStats])
 
   useEffect(() => {
-    // Reset when user changes
+    // Reset when auth state changes
     setHasLoaded(false)
     setIsLoadingStats(true)
-  }, [user])
+  }, [account, isAuthed])
 
   useEffect(() => {
-    // Load stats when user is available and not yet loaded
-    if (user && !hasLoaded) {
+    // Load stats only when authenticated and not yet loaded
+    if (account && isAuthed && !hasLoaded) {
       loadStats()
-    } else if (!user) {
-      // Clear stats when user logs out
+    } else if (!account || !isAuthed) {
       setUserStats(null)
       setIsLoadingStats(false)
       setHasLoaded(false)
     }
-  }, [user, hasLoaded, loadStats])
+  }, [account, isAuthed, hasLoaded, loadStats])
 
   const value: AppBootstrapContextType = {
     userStats,
