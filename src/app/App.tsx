@@ -1,5 +1,6 @@
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ThirdwebProvider } from 'thirdweb/react'
 import { AuthProvider } from '../context/AuthContext'
 import { AppBootstrapProvider } from '../context/AppBootstrapContext'
 import { ToastProvider } from '../context/ToastContext'
@@ -24,13 +25,15 @@ function App() {
       <InitialLoader />
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <AppBootstrapProvider>
-              <ToastProvider>
-                <AppRouter />
-              </ToastProvider>
-            </AppBootstrapProvider>
-          </AuthProvider>
+          <ThirdwebProvider>
+            <AuthProvider>
+              <AppBootstrapProvider>
+                <ToastProvider>
+                  <AppRouter />
+                </ToastProvider>
+              </AppBootstrapProvider>
+            </AuthProvider>
+          </ThirdwebProvider>
         </QueryClientProvider>
       </BrowserRouter>
     </>

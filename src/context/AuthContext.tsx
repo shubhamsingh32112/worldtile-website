@@ -7,6 +7,11 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>
   signup: (name: string, email: string, password: string, referralCode?: string) => Promise<void>
   loginWithGoogle: () => Promise<void>
+  loginWithWallet: (
+    address: string,
+    signMessage: (message: string) => Promise<string>,
+    referralCode?: string | null
+  ) => Promise<void>
   logout: () => void
   loading: boolean
 }
@@ -125,6 +130,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     signup,
     loginWithGoogle,
+    loginWithWallet: async (address, signMessage, referralCode) => {
+      // 1) Request nonce
+      const { nonce } = await authService.getWalletNonce(address)
+      // 2) Ask wallet to sign
+      const signature = await signMessage(`Login nonce: ${nonce}`)
+      // 3) Verify with backend and establish session
+      const response = await authService.verifyWalletLogin({ address, signature, ...(referralCode ? { referralCode } : {}) } as any)
+      if (response.success) {
+        setToken(response.token)
+        setUser(response.user)
+        localStorage.setItem('token', response.token)
+        localStorage.setItem('user', JSON.stringify(response.user))
+      } else {
+        throw new Error(response.message || 'Wallet login failed')
+      }
+    },
     logout,
     loading,
   }
