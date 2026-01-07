@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth, WalletProfile } from '../../context/AuthContext'
 import WalletConnect from '../../components/WalletConnect'
-import { useActiveAccount } from 'thirdweb/react'
+import { useActiveAccount, useProfiles, useDisconnect, useActiveWallet } from 'thirdweb/react'
 import { signMessage } from 'thirdweb/utils'
+import { getUserEmail } from 'thirdweb/wallets/in-app'
 import { thirdwebClient } from '../../lib/thirdweb'
 
 export default function LoginPage() {
@@ -12,11 +13,57 @@ export default function LoginPage() {
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const account = useActiveAccount()
+  const { data: profiles, isLoading: profilesLoading } = useProfiles({ 
+    client: thirdwebClient,
+    ...(account ? { account } : {})
+  })
+  const { disconnect } = useDisconnect()
+  const wallet = useActiveWallet()
   const hasTriedLogin = useRef(false)
+  const hasDisconnected = useRef(false)
+
+  // Force disconnect wallet if user just logged out
+  useEffect(() => {
+    const forceDisconnect = async () => {
+      const logoutTimestamp = localStorage.getItem('logoutTimestamp')
+      if (logoutTimestamp && wallet && !hasDisconnected.current) {
+        const timeSinceLogout = Date.now() - parseInt(logoutTimestamp, 10)
+        if (timeSinceLogout < 10000) {
+          // User just logged out, force disconnect wallet
+          try {
+            await disconnect(wallet)
+            hasDisconnected.current = true
+          } catch (e) {
+            console.warn('Failed to disconnect wallet:', e)
+          }
+        }
+      }
+    }
+    forceDisconnect()
+  }, [wallet, disconnect])
 
   useEffect(() => {
     const run = async () => {
-      if (!account || token || hasTriedLogin.current) return
+      // Check if user just logged out (within last 5 seconds) - prevent auto-login
+      const logoutTimestamp = localStorage.getItem('logoutTimestamp')
+      if (logoutTimestamp) {
+        const timeSinceLogout = Date.now() - parseInt(logoutTimestamp, 10)
+        if (timeSinceLogout < 5000) {
+          // User just logged out, don't auto-login
+          return
+        } else {
+          // Clear the flag after 5 seconds
+          localStorage.removeItem('logoutTimestamp')
+          hasDisconnected.current = false // Reset disconnect flag
+        }
+      }
+      
+      // Wait for profiles to load if they're loading
+      if (profilesLoading || !account || token || hasTriedLogin.current) return
+      
+      // Give profiles a moment to load after account connects
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
       hasTriedLogin.current = true
       setLoading(true)
       setError('')
@@ -24,7 +71,65 @@ export default function LoginPage() {
         const signer = async (message: string) => {
           return await signMessage({ account, client: thirdwebClient, message })
         }
-        await loginWithWallet(account.address, signer)
+        
+        // Extract profile data from thirdweb profiles (email, phone, name, etc.)
+        const profile: WalletProfile = {}
+        
+        // Try to get email using getUserEmail first (more reliable)
+        try {
+          const email = await getUserEmail({ client: thirdwebClient })
+          if (email) {
+            profile.email = email
+            console.log('Got email from getUserEmail:', email)
+          }
+        } catch (e) {
+          console.warn('getUserEmail failed:', e)
+        }
+        
+        // Also check profiles for additional data
+        if (profiles && profiles.length > 0) {
+          console.log('Thirdweb profiles:', profiles)
+          
+          for (const p of profiles) {
+            // Handle email profile type
+            if (p.type === 'email' && (p as any).details?.email) {
+              profile.email = profile.email || (p as any).details.email
+            }
+            
+            // Handle phone profile type
+            if (p.type === 'phone' && (p as any).details?.phone) {
+              profile.phone = (p as any).details.phone
+            }
+            
+            // Handle Google profile type
+            if (p.type === 'google') {
+              const details = (p as any).details || (p as any)
+              if (details.email) profile.email = profile.email || details.email
+              if (details.name) profile.name = profile.name || details.name
+              if (details.picture) profile.profileImage = profile.profileImage || details.picture
+            }
+            
+            // Handle Apple profile type
+            if (p.type === 'apple') {
+              const details = (p as any).details || (p as any)
+              if (details.email) profile.email = profile.email || details.email
+              if (details.name) profile.name = profile.name || details.name
+            }
+            
+            // Handle Facebook profile type
+            if (p.type === 'facebook') {
+              const details = (p as any).details || (p as any)
+              if (details.email) profile.email = profile.email || details.email
+              if (details.name) profile.name = profile.name || details.name
+              if (details.picture) profile.profileImage = profile.profileImage || details.picture
+            }
+          }
+        }
+        
+        console.log('Extracted profile:', profile)
+        await loginWithWallet(account.address, signer, null, profile)
+        // Clear logout flag on successful login
+        localStorage.removeItem('logoutTimestamp')
         navigate('/home')
       } catch (e: any) {
         setError(e?.message || 'Wallet login failed')
@@ -35,7 +140,7 @@ export default function LoginPage() {
     }
     run()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [account?.address, token])
+  }, [account?.address, token, profiles, profilesLoading])
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 md:px-6 py-8">

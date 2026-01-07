@@ -1,6 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { authService, User } from '../services/authService'
 
+export interface WalletProfile {
+  email?: string
+  name?: string
+  phone?: string
+  profileImage?: string
+}
+
 interface AuthContextType {
   user: User | null
   token: string | null
@@ -10,7 +17,8 @@ interface AuthContextType {
   loginWithWallet: (
     address: string,
     signMessage: (message: string) => Promise<string>,
-    referralCode?: string | null
+    referralCode?: string | null,
+    profile?: WalletProfile
   ) => Promise<void>
   logout: () => void
   loading: boolean
@@ -130,13 +138,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     signup,
     loginWithGoogle,
-    loginWithWallet: async (address, signMessage, referralCode) => {
+    loginWithWallet: async (address, signMessage, referralCode, profile) => {
       // 1) Request nonce
       const { nonce } = await authService.getWalletNonce(address)
       // 2) Ask wallet to sign
       const signature = await signMessage(`Login nonce: ${nonce}`)
-      // 3) Verify with backend and establish session
-      const response = await authService.verifyWalletLogin({ address, signature, ...(referralCode ? { referralCode } : {}) } as any)
+      // 3) Verify with backend and establish session (include profile data if available)
+      const response = await authService.verifyWalletLogin({
+        address,
+        signature,
+        ...(referralCode ? { referralCode } : {}),
+        ...(profile?.email ? { email: profile.email } : {}),
+        ...(profile?.name ? { name: profile.name } : {}),
+        ...(profile?.phone ? { phone: profile.phone } : {}),
+        ...(profile?.profileImage ? { profileImage: profile.profileImage } : {}),
+      })
       if (response.success) {
         setToken(response.token)
         setUser(response.user)

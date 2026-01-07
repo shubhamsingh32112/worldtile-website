@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUserAccount } from '../hooks/useUserAccount'
@@ -11,6 +11,7 @@ import StatCard from '../components/StatCard'
 import ErrorState from '../components/ErrorState'
 import AccountPageSkeleton from '../components/AccountPageSkeleton'
 import { Check, Lock, LogOut, Grid3x3, DollarSign, ArrowLeft } from 'lucide-react'
+import { useDisconnect, useActiveWallet } from 'thirdweb/react'
 
 export default function ProfilePage() {
   const navigate = useNavigate()
@@ -19,6 +20,8 @@ export default function ProfilePage() {
   const queryClient = useQueryClient()
   const { data: account, isLoading, error } = useUserAccount()
   const { data: lands, isLoading: isLoadingLands } = useUserLands()
+  const { disconnect } = useDisconnect()
+  const wallet = useActiveWallet()
   const [isUpdatingProfile, setIsUpdatingProfile] = useState(false)
   const [editingName, setEditingName] = useState(false)
   const [editingPhone, setEditingPhone] = useState(false)
@@ -39,13 +42,33 @@ export default function ProfilePage() {
     }
   }, [account])
 
+  // Handle logout with wallet disconnection
+  const handleLogout = useCallback(async () => {
+    try {
+      // Disconnect wallet if connected
+      if (wallet) {
+        await disconnect(wallet)
+        // Give it a moment to fully disconnect
+        await new Promise(resolve => setTimeout(resolve, 500))
+      }
+    } catch (e) {
+      console.warn('Error disconnecting wallet:', e)
+    }
+    // Set a flag to prevent auto-login immediately after logout
+    localStorage.setItem('logoutTimestamp', Date.now().toString())
+    // Then logout from auth context
+    logout()
+    // Navigate to login page
+    navigate('/login')
+  }, [wallet, disconnect, logout, navigate])
+
   // Handle unauthorized errors
   useEffect(() => {
     if (error && (error as any).isUnauthorized) {
-      logout()
+      handleLogout()
       navigate('/login')
     }
-  }, [error, logout, navigate])
+  }, [error, navigate, handleLogout])
 
   const loadAccountData = async () => {
     await queryClient.invalidateQueries({ queryKey: ['userAccount'] })
@@ -177,7 +200,7 @@ export default function ProfilePage() {
           Back
         </button>
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className="flex items-center gap-2 px-4 py-2 bg-red-600/80 hover:bg-red-600 text-white rounded-xl font-semibold transition-colors"
         >
           <LogOut className="w-4 h-4" />
