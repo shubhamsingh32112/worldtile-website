@@ -69,7 +69,7 @@ export default function LoginPage() {
       setError('')
       try {
         const signer = async (message: string) => {
-          return await signMessage({ account, client: thirdwebClient, message })
+          return await signMessage({ account, message })
         }
         
         // Extract profile data from thirdweb profiles (email, phone, name, etc.)
