@@ -1,155 +1,169 @@
-import { useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
-import { useAuth } from '../../context/AuthContext'
-import { Mail, Lock, AlertCircle } from 'lucide-react'
-
-interface LoginFormData {
-  email: string
-  password: string
-}
+import { useAuth, WalletProfile } from '../../context/AuthContext'
+import WalletConnect from '../../components/WalletConnect'
+import { useActiveAccount, useProfiles, useDisconnect, useActiveWallet } from 'thirdweb/react'
+import { signMessage } from 'thirdweb/utils'
+import { getUserEmail } from 'thirdweb/wallets/in-app'
+import { thirdwebClient } from '../../lib/thirdweb'
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const { login, loginWithGoogle } = useAuth()
+  const { token, loginWithWallet } = useAuth()
   const [error, setError] = useState<string>('')
   const [loading, setLoading] = useState(false)
+  const account = useActiveAccount()
+  const { data: profiles, isLoading: profilesLoading } = useProfiles({ 
+    client: thirdwebClient,
+    ...(account ? { account } : {})
+  })
+  const { disconnect } = useDisconnect()
+  const wallet = useActiveWallet()
+  const hasTriedLogin = useRef(false)
+  const hasDisconnected = useRef(false)
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>()
-
-  const onSubmit = async (data: LoginFormData) => {
-    setError('')
-    setLoading(true)
-    try {
-      await login(data.email, data.password)
-      navigate('/home')
-    } catch (err: any) {
-      setError(err.message || 'Login failed. Please check your credentials.')
-    } finally {
-      setLoading(false)
+  // Force disconnect wallet if user just logged out
+  useEffect(() => {
+    const forceDisconnect = async () => {
+      const logoutTimestamp = localStorage.getItem('logoutTimestamp')
+      if (logoutTimestamp && wallet && !hasDisconnected.current) {
+        const timeSinceLogout = Date.now() - parseInt(logoutTimestamp, 10)
+        if (timeSinceLogout < 10000) {
+          // User just logged out, force disconnect wallet
+          try {
+            await disconnect(wallet)
+            hasDisconnected.current = true
+          } catch (e) {
+            console.warn('Failed to disconnect wallet:', e)
+          }
+        }
+      }
     }
-  }
+    forceDisconnect()
+  }, [wallet, disconnect])
 
-  const handleGoogleLogin = async () => {
-    setError('')
-    try {
-      await loginWithGoogle()
-      navigate('/home')
-    } catch (err: any) {
-      setError(err.message || 'Google login failed. Please try again.')
+  useEffect(() => {
+    const run = async () => {
+      // Check if user just logged out (within last 5 seconds) - prevent auto-login
+      const logoutTimestamp = localStorage.getItem('logoutTimestamp')
+      if (logoutTimestamp) {
+        const timeSinceLogout = Date.now() - parseInt(logoutTimestamp, 10)
+        if (timeSinceLogout < 5000) {
+          // User just logged out, don't auto-login
+          return
+        } else {
+          // Clear the flag after 5 seconds
+          localStorage.removeItem('logoutTimestamp')
+          hasDisconnected.current = false // Reset disconnect flag
+        }
+      }
+      
+      // Wait for profiles to load if they're loading
+      if (profilesLoading || !account || token || hasTriedLogin.current) return
+      
+      // Give profiles a moment to load after account connects
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      
+      hasTriedLogin.current = true
+      setLoading(true)
+      setError('')
+      try {
+        const signer = async (message: string) => {
+          return await signMessage({ account, client: thirdwebClient, message })
+        }
+        
+        // Extract profile data from thirdweb profiles (email, phone, name, etc.)
+        const profile: WalletProfile = {}
+        
+        // Try to get email using getUserEmail first (more reliable)
+        try {
+          const email = await getUserEmail({ client: thirdwebClient })
+          if (email) {
+            profile.email = email
+            console.log('Got email from getUserEmail:', email)
+          }
+        } catch (e) {
+          console.warn('getUserEmail failed:', e)
+        }
+        
+        // Also check profiles for additional data
+        if (profiles && profiles.length > 0) {
+          console.log('Thirdweb profiles:', profiles)
+          
+          for (const p of profiles) {
+            // Handle email profile type
+            if (p.type === 'email' && (p as any).details?.email) {
+              profile.email = profile.email || (p as any).details.email
+            }
+            
+            // Handle phone profile type
+            if (p.type === 'phone' && (p as any).details?.phone) {
+              profile.phone = (p as any).details.phone
+            }
+            
+            // Handle Google profile type
+            if (p.type === 'google') {
+              const details = (p as any).details || (p as any)
+              if (details.email) profile.email = profile.email || details.email
+              if (details.name) profile.name = profile.name || details.name
+              if (details.picture) profile.profileImage = profile.profileImage || details.picture
+            }
+            
+            // Handle Apple profile type
+            if (p.type === 'apple') {
+              const details = (p as any).details || (p as any)
+              if (details.email) profile.email = profile.email || details.email
+              if (details.name) profile.name = profile.name || details.name
+            }
+            
+            // Handle Facebook profile type
+            if (p.type === 'facebook') {
+              const details = (p as any).details || (p as any)
+              if (details.email) profile.email = profile.email || details.email
+              if (details.name) profile.name = profile.name || details.name
+              if (details.picture) profile.profileImage = profile.profileImage || details.picture
+            }
+          }
+        }
+        
+        console.log('Extracted profile:', profile)
+        await loginWithWallet(account.address, signer, null, profile)
+        // Clear logout flag on successful login
+        localStorage.removeItem('logoutTimestamp')
+        navigate('/home')
+      } catch (e: any) {
+        setError(e?.message || 'Wallet login failed')
+        hasTriedLogin.current = false // Allow retry on error
+      } finally {
+        setLoading(false)
+      }
     }
-  }
+    run()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [account?.address, token, profiles, profilesLoading])
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 md:px-6 py-8">
       <div className="w-full max-w-md md:max-w-lg">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
-          <p className="text-gray-400">Sign in to your WorldTile account</p>
+          <h1 className="text-3xl font-bold mb-2">Welcome</h1>
+          <p className="text-gray-400">Sign in with your wallet</p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3 flex items-center gap-2 text-red-400">
-              <AlertCircle className="w-5 h-5" />
-              <span className="text-sm">{error}</span>
-            </div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="email"
-                {...register('email', {
-                  required: 'Email is required',
-                  pattern: {
-                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: 'Invalid email address',
-                  },
-                })}
-                className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="your@email.com"
-              />
-            </div>
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-400">{errors.email.message}</p>
-            )}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3 text-red-400 text-sm mb-4">
+            {error}
           </div>
+        )}
 
-          <div>
-            <label className="block text-sm font-medium mb-2">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="password"
-                {...register('password', {
-                  required: 'Password is required',
-                })}
-                className="w-full pl-10 pr-4 py-3 bg-gray-800/50 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="••••••••"
-              />
-            </div>
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-400">{errors.password.message}</p>
-            )}
-          </div>
+        <WalletConnect />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors"
-          >
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
-
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-700"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-transparent text-gray-400">Or continue with</span>
-            </div>
-          </div>
-
-          <button
-            onClick={handleGoogleLogin}
-            disabled={loading}
-            className="mt-4 w-full py-3 rounded-lg bg-white text-black font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="currentColor"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              />
-              <path
-                fill="currentColor"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              />
-            </svg>
-            Google
-          </button>
-        </div>
+        {loading && <p className="mt-4 text-sm text-gray-400 text-center">Completing sign-in...</p>}
 
         <p className="mt-6 text-center text-sm text-gray-400">
-          Don't have an account?{' '}
+          New here?{' '}
           <Link to="/signup" className="text-blue-400 hover:text-blue-300 font-medium">
-            Sign up
+            Create account
           </Link>
         </p>
       </div>

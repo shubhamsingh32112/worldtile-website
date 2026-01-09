@@ -4,7 +4,6 @@ import GooeyNav from './GooeyNav'
 const navItems = [
   { path: '/home', label: 'Home' },
   { path: '/buy-land', label: 'Buy Land' },
-  { path: '/deeds', label: 'Deeds' },
   { path: '/earn', label: 'Earn' },
   { path: '/settings', label: 'Settings' },
 ]

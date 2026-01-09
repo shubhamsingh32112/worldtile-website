@@ -4,6 +4,9 @@ export interface NFT {
   tokenId: string
   contractAddress: string
   blockchain: string
+  standard?: string
+  mintTxHash?: string | null
+  openSeaUrl?: string | null
 }
 
 export interface Payment {

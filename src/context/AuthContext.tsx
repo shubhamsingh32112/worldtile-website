@@ -1,12 +1,25 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { authService, User } from '../services/authService'
 
+export interface WalletProfile {
+  email?: string
+  name?: string
+  phone?: string
+  profileImage?: string
+}
+
 interface AuthContextType {
   user: User | null
   token: string | null
   login: (email: string, password: string) => Promise<void>
   signup: (name: string, email: string, password: string, referralCode?: string) => Promise<void>
   loginWithGoogle: () => Promise<void>
+  loginWithWallet: (
+    address: string,
+    signMessage: (message: string) => Promise<string>,
+    referralCode?: string | null,
+    profile?: WalletProfile
+  ) => Promise<void>
   logout: () => void
   loading: boolean
 }
@@ -125,6 +138,30 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     login,
     signup,
     loginWithGoogle,
+    loginWithWallet: async (address, signMessage, referralCode, profile) => {
+      // 1) Request nonce
+      const { nonce } = await authService.getWalletNonce(address)
+      // 2) Ask wallet to sign
+      const signature = await signMessage(`Login nonce: ${nonce}`)
+      // 3) Verify with backend and establish session (include profile data if available)
+      const response = await authService.verifyWalletLogin({
+        address,
+        signature,
+        ...(referralCode ? { referralCode } : {}),
+        ...(profile?.email ? { email: profile.email } : {}),
+        ...(profile?.name ? { name: profile.name } : {}),
+        ...(profile?.phone ? { phone: profile.phone } : {}),
+        ...(profile?.profileImage ? { profileImage: profile.profileImage } : {}),
+      })
+      if (response.success) {
+        setToken(response.token)
+        setUser(response.user)
+        localStorage.setItem('token', response.token)
+        localStorage.setItem('user', JSON.stringify(response.user))
+      } else {
+        throw new Error(response.message || 'Wallet login failed')
+      }
+    },
     logout,
     loading,
   }

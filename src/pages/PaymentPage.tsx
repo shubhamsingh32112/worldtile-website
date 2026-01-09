@@ -132,7 +132,7 @@ export default function PaymentPage() {
   }
 
   const generateQRPayload = (): string => {
-    return `tron:${address}?amount=${amount}`
+    return address
   }
 
   const copyToClipboard = async (text: string, type: 'address' | 'amount') => {
@@ -181,7 +181,7 @@ export default function PaymentPage() {
 
         // Auto-redirect to deed page after delay
         setTimeout(() => {
-          navigate('/deeds')
+          navigate('/settings/deeds')
         }, 3000)
       } else if (status === 'EXPIRED') {
         // Network-sanity protection: backend says expired, sync frontend immediately

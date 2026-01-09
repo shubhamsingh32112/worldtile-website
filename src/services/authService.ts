@@ -47,6 +47,28 @@ export const authService = {
     return response.data
   },
 
+  // Wallet-based auth (thirdweb): nonce + sign + verify
+  async getWalletNonce(address: string): Promise<{ success: boolean; nonce: string }> {
+    const response = await api.get<{ success: boolean; nonce: string }>(`/auth/nonce`, {
+      params: { address },
+    })
+    return response.data
+  },
+
+  async verifyWalletLogin(input: {
+    address: string
+    signature: string
+    referralCode?: string
+    // User profile from thirdweb in-app wallet
+    email?: string
+    name?: string
+    phone?: string
+    profileImage?: string
+  }): Promise<AuthResponse> {
+    const response = await api.post<AuthResponse>('/auth/verify', input)
+    return response.data
+  },
+
   async googleLogin(): Promise<AuthResponse> {
     // Sign in with Google using Firebase
     const result = await signInWithPopup(auth, googleProvider)

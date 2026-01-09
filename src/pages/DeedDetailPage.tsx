@@ -4,7 +4,7 @@ import { deedService, type Deed } from '../services/deedService'
 import GlassCard from '../components/GlassCard'
 import ErrorState from '../components/ErrorState'
 import LoadingSpinner from '../components/LoadingSpinner'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ExternalLink } from 'lucide-react'
 
 export default function DeedDetailPage() {
   const { propertyId } = useParams<{ propertyId: string }>()
@@ -148,6 +148,22 @@ export default function DeedDetailPage() {
               <span className="text-gray-400 text-sm">Blockchain</span>
               <span className="text-white font-medium">{deed.nft.blockchain}</span>
             </div>
+
+            {/* OpenSea Link */}
+            {deed.nft.openSeaUrl && (
+              <div className="flex justify-between py-2 border-b border-white/10">
+                <span className="text-gray-400 text-sm">View on OpenSea</span>
+                <a
+                  href={deed.nft.openSeaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                >
+                  <span>OpenSea</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
+            )}
 
             {/* Latitude */}
             <div className="flex justify-between py-2 border-b border-white/10">
