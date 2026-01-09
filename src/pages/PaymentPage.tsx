@@ -132,7 +132,7 @@ export default function PaymentPage() {
   }
 
   const generateQRPayload = (): string => {
-    return `tron:${address}?amount=${amount}`
+    return address
   }
 
   const copyToClipboard = async (text: string, type: 'address' | 'amount') => {

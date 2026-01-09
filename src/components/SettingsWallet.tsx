@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { ConnectButton } from 'thirdweb/react'
 import { thirdwebClient, supportedWallets } from '../lib/thirdweb'
+import { appChains } from "../lib/chains"
 import GlassCard from './GlassCard'
 import { Wallet } from 'lucide-react'
 
@@ -34,6 +35,7 @@ export default function SettingsWallet() {
         <ConnectButton
           client={thirdwebClient}
           wallets={supportedWallets}
+          chains={appChains}
           connectModal={{ size: 'wide' }}
         />
       </div>
