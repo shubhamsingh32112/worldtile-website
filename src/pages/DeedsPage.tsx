@@ -92,10 +92,17 @@ export default function DeedsPage() {
               padding="p-4"
               onClick={() => handleViewDeed(land.landSlotId)}
             >
-              {/* Land Slot ID */}
+              {/* Land Slot ID / Plot ID */}
               <div className="flex items-center gap-2 mb-3">
                 <Mountain className="w-5 h-5 text-blue-500" />
-                <span className="text-white font-bold">{land.landSlotId}</span>
+                <span className="text-white font-bold">
+                  {land.landSlotId.startsWith('WT-IND-') 
+                    ? land.landSlotId 
+                    : land.landSlotId
+                        .split('_')
+                        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                        .join(' ')}
+                </span>
               </div>
 
               {/* Location */}

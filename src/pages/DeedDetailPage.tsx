@@ -229,7 +229,7 @@ export default function DeedDetailPage() {
                 </p>
                 <div className="w-full h-px bg-white/20 my-2" />
                 <p className="text-[10px] text-gray-500 mb-1">SEAL NO</p>
-                <p className="text-xs font-bold text-white">{deed.sealNo}</p>
+                <p className="text-sm font-bold text-white tracking-wider">{deed.sealNo}</p>
               </div>
             )}
           </div>
