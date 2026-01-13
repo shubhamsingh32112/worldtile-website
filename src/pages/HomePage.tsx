@@ -5,6 +5,7 @@ import CityCard from '../components/CityCard'
 import SectionDivider from '../components/SectionDivider'
 import GlobeHero from '../components/GlobeHero'
 import LightRays from '../components/LightRays'
+import { NoiseBackground } from '@/components/ui/noise-background'
 import { Lock, MessageSquare, Zap, TrendingUp, Users, Plus, Minus } from 'lucide-react'
 
 interface City {
@@ -117,10 +118,22 @@ export default function HomePage() {
     Welcome to Phase 1 of our Metaverse. We’re building a decentralized world where ownership is absolute and the possibilities for earning are limitless.
   </p>
 
-  <div className="mt-8">
-    <button onClick={handleBuyLandClick} className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-xl shadow-lg hover:scale-105 transition-transform">
-      Explore the Metaverse
-    </button>
+  <div className="mt-8 flex justify-center">
+    <NoiseBackground
+      containerClassName="w-fit p-2 rounded-full mx-auto"
+      gradientColors={[
+        "rgb(255, 100, 150)",
+        "rgb(100, 150, 255)",
+        "rgb(255, 200, 100)",
+      ]}
+    >
+      <button
+        onClick={handleBuyLandClick}
+        className="h-full w-full cursor-pointer rounded-full bg-black px-6 py-3 text-white shadow-[0px_1px_0px_0px_var(--color-neutral-950)_inset,0px_1px_0px_0px_var(--color-neutral-800)] transition-all duration-100 active:scale-98 font-semibold"
+      >
+        Explore the Metaverse &rarr;
+      </button>
+    </NoiseBackground>
   </div>
 </div>
 
@@ -182,9 +195,23 @@ export default function HomePage() {
       The revolution is happening. This is your chance to own a stake in the foundation of a new world.
       Don’t wait for “someday.” Build today.
     </p>
-    <button onClick={handleBuyLandClick} className="w-full py-3 bg-purple-600  rounded-xl text-white font-semibold shadow-lg hover:scale-105 transition">
-      Secure Your Land
-    </button>
+    <div className="w-full">
+      <NoiseBackground
+        containerClassName="w-full p-2 rounded-full"
+        gradientColors={[
+          "rgb(255, 100, 150)",
+          "rgb(100, 150, 255)",
+          "rgb(255, 200, 100)",
+        ]}
+      >
+        <button
+          onClick={handleBuyLandClick}
+          className="h-full w-full cursor-pointer rounded-full bg-black px-6 py-3 text-white shadow-[0px_1px_0px_0px_var(--color-neutral-950)_inset,0px_1px_0px_0px_var(--color-neutral-800)] transition-all duration-100 active:scale-98 font-semibold"
+        >
+          Secure Your Land &rarr;
+        </button>
+      </NoiseBackground>
+    </div>
   </GlassCard>
 
 </div>
@@ -353,12 +380,21 @@ export default function HomePage() {
               </h3>
               <p className="text-sm text-gray-400">Invite friends and earn</p>
             </div>
-            <button
-              onClick={handleInviteFriendsClick}
-              className="px-6 py-3 bg-purple-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors whitespace-nowrap"
+            <NoiseBackground
+              containerClassName="w-fit p-2 rounded-full"
+              gradientColors={[
+                "rgb(255, 100, 150)",
+                "rgb(100, 150, 255)",
+                "rgb(255, 200, 100)",
+              ]}
             >
-              Invite Friends
-            </button>
+              <button
+                onClick={handleInviteFriendsClick}
+                className="h-full w-full cursor-pointer rounded-full bg-black px-6 py-3 text-white shadow-[0px_1px_0px_0px_var(--color-neutral-950)_inset,0px_1px_0px_0px_var(--color-neutral-800)] transition-all duration-100 active:scale-98 font-bold whitespace-nowrap"
+              >
+                Invite Friends &rarr;
+              </button>
+            </NoiseBackground>
           </div>
         </GlassCard>
       </div>
