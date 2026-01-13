@@ -143,8 +143,20 @@ export default function LoginPage() {
   }, [account?.address, token, profiles, profilesLoading])
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 md:px-6 py-8">
-      <div className="w-full max-w-md md:max-w-lg">
+    <div 
+      className="min-h-screen flex items-center justify-center px-4 md:px-6 py-8 relative"
+      style={{
+        backgroundImage: 'url(/assets/background/desktop.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      {/* Dark overlay for better readability - darker on mobile for better contrast */}
+      <div className="absolute inset-0 bg-black/40 md:bg-black/40" />
+      
+      {/* Content container with z-index to appear above background */}
+      <div className="w-full max-w-md md:max-w-lg relative z-10">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2">Welcome</h1>
           <p className="text-gray-400">Sign in with your wallet</p>

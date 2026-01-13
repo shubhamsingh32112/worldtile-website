@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { adminService } from '../../services/adminService'
-import LoadingSpinner from '../../components/LoadingSpinner'
+import InitialLoader from '../../components/InitialLoader'
 import ErrorState from '../../components/ErrorState'
 import { useToast } from '../../context/ToastContext'
 
@@ -53,11 +53,7 @@ export default function Support() {
   }
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <LoadingSpinner />
-      </div>
-    )
+    return <InitialLoader visible={isLoading} />
   }
 
   if (error) {

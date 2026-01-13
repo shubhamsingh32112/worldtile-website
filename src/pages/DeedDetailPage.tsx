@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { deedService, type Deed } from '../services/deedService'
 import GlassCard from '../components/GlassCard'
 import ErrorState from '../components/ErrorState'
-import LoadingSpinner from '../components/LoadingSpinner'
+import InitialLoader from '../components/InitialLoader'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 
 export default function DeedDetailPage() {
@@ -55,11 +55,7 @@ export default function DeedDetailPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="py-8 px-4 md:px-6">
-        <LoadingSpinner />
-      </div>
-    )
+    return <InitialLoader visible={isLoading} />
   }
 
   if (errorMessage || !deed) {

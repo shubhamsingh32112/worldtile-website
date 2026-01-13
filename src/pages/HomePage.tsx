@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import GlassCard from '../components/GlassCard'
 import CityCard from '../components/CityCard'
 import SectionDivider from '../components/SectionDivider'
 import GlobeHero from '../components/GlobeHero'
 import LightRays from '../components/LightRays'
-import { Lock, MessageSquare, Zap, TrendingUp, Users } from 'lucide-react'
+import { Lock, MessageSquare, Zap, TrendingUp, Users, Plus, Minus } from 'lucide-react'
 
 interface City {
   name: string
@@ -40,6 +41,7 @@ const TOP_CITIES: City[] = [
 
 export default function HomePage() {
   const navigate = useNavigate()
+  const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   const handleCityCardTap = (city: City) => {
     // Navigate to Buy Land page
@@ -246,15 +248,19 @@ export default function HomePage() {
 {/* FAQ SECTION */}
 <SectionDivider />
 
-<div className="mt-16 mb-20 px-4 max-w-4xl mx-auto">
-  <h2 className="text-4xl font-extrabold text-white text-center mb-3 tracking-tight">
-    Frequently asked questions
-  </h2>
-  <p className="text-gray-400 text-center mb-10">
-    Everything you need to know
-  </p>
+<div className="relative mt-16 mb-20 px-4 md:px-6">
+  {/* Dark gradient background */}
+  <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-purple-900 rounded-3xl" />
+  
+  {/* Content container */}
+  <div className="relative max-w-4xl mx-auto py-16 px-6 md:px-12">
+    {/* FAQ Title */}
+    <h2 className="text-5xl md:text-6xl font-extrabold text-white text-center mb-16 tracking-tight">
+      FAQ
+    </h2>
 
-  <div className="space-y-4">
+    {/* FAQ Items */}
+    <div className="space-y-0">
 
 {[
   {
@@ -291,31 +297,50 @@ export default function HomePage() {
     q: "If I don’t have USDT, how can I pay?",
     a: `If you don’t already have USDT, you can easily buy it using INR through popular crypto apps and exchanges in India. Simply create an account on any supported platform, purchase USDT using UPI or bank transfer, and then send the USDT to the provided wallet address (TRC20 only) to complete your payment. This process usually takes just a few minutes, even for first-time users.`
   },
-].map((item, i) => (
-  <details
-    key={i}
-    className="group bg-white/[0.06] border border-white/[0.08] hover:border-white/20 backdrop-blur-xl rounded-2xl p-6 transition-all duration-300
-               open:shadow-[0_0_20px_rgba(255,255,255,0.1)] open:scale-[1.01]"
-  >
-    <summary className="flex items-center justify-between cursor-pointer list-none">
-      <h3 className="text-white font-semibold text-lg">{item.q}</h3>
-      
-      {/* +/- ICON */}
-      <span className="text-gray-300 text-2xl font-bold w-6 h-6 flex items-center justify-center
-                      transition-transform group-open:rotate-180">
-        <span className="group-open:hidden select-none">+</span>
-        <span className="hidden group-open:block select-none">−</span>
-      </span>
-    </summary>
+].map((item, i, arr) => (
+        <div key={i}>
+          <div 
+            className="flex items-center justify-between py-6 cursor-pointer"
+            onClick={() => setOpenIndex(openIndex === i ? null : i)}
+          >
+            <h3 className="text-white font-medium text-lg md:text-xl pr-4 flex-1">
+              {item.q}
+            </h3>
+            
+            {/* Circular button with + icon */}
+            <button
+              className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-800/80 hover:bg-gray-700/80 flex items-center justify-center flex-shrink-0 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation()
+                setOpenIndex(openIndex === i ? null : i)
+              }}
+            >
+              {openIndex === i ? (
+                <Minus className="w-4 h-4 md:w-5 md:h-5 text-white" />
+              ) : (
+                <Plus className="w-4 h-4 md:w-5 md:h-5 text-white" />
+              )}
+            </button>
+          </div>
 
-    <p className="mt-4 text-gray-300 text-[0.95rem] leading-relaxed whitespace-pre-line">
-      {item.a}
-    </p>
-  </details>
-))}
+          {/* Answer content */}
+          {openIndex === i && (
+            <div className="pb-6">
+              <p className="text-gray-300 text-base leading-relaxed whitespace-pre-line pr-12">
+                {item.a}
+              </p>
+            </div>
+          )}
 
-</div>
+          {/* Divider line (not after last item) */}
+          {i < arr.length - 1 && (
+            <div className="h-px bg-gray-500/40 my-2" />
+          )}
+        </div>
+      ))}
 
+    </div>
+  </div>
 </div>
 
       {/* Rewards/Referral Strip */}

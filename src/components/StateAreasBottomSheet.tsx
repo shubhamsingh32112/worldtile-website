@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { areaService, type Area } from '../services/areaService'
 import GlassCard from './GlassCard'
 import ErrorState from './ErrorState'
-import LoadingSpinner from './LoadingSpinner'
+import InitialLoader from './InitialLoader'
 import { X, MapPin } from 'lucide-react'
 
 interface StateAreasBottomSheetProps {
@@ -68,9 +68,7 @@ export default function StateAreasBottomSheet({ stateKey, onClose }: StateAreasB
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4">
         {isLoading ? (
-          <div className="py-8">
-            <LoadingSpinner />
-          </div>
+          <InitialLoader visible={isLoading} />
         ) : errorMessage ? (
           <ErrorState message={errorMessage} onRetry={loadAreas} />
         ) : areas.length === 0 ? (

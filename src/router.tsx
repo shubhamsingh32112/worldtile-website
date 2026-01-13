@@ -16,7 +16,7 @@ import ProfilePage from './pages/ProfilePage'
 import KYCPage from './pages/KYCPage'
 import SettingsSupportPage from './pages/SettingsSupportPage'
 import PrivacyPolicy from './pages/PrivacyPolicy'
-import LoadingSpinner from './components/LoadingSpinner'
+import InitialLoader from './components/InitialLoader'
 import RefundPolicy from './pages/refundPolicy'
 import TermsAndConditions from './pages/terms_and_condition'
 import AgentProgram from './pages/AgentProgram'
@@ -63,7 +63,7 @@ function AppRouter() {
   const { user, loading } = useAuth()
 
   if (loading) {
-    return <LoadingSpinner />
+    return <InitialLoader visible={loading} />
   }
 
   return (

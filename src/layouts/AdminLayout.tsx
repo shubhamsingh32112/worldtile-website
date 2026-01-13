@@ -1,6 +1,6 @@
 import { Outlet, NavLink, useNavigate, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import LoadingSpinner from '../components/LoadingSpinner'
+import InitialLoader from '../components/InitialLoader'
 
 export default function AdminLayout() {
   const { user, loading } = useAuth()
@@ -8,11 +8,7 @@ export default function AdminLayout() {
 
   // Loading gate - prevent flicker
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    )
+    return <InitialLoader visible={loading} />
   }
 
   // Redirect if not admin

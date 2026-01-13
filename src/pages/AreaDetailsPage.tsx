@@ -5,7 +5,7 @@ import { orderService } from '../services/orderService'
 import { useToast } from '../context/ToastContext'
 import GlassCard from '../components/GlassCard'
 import ErrorState from '../components/ErrorState'
-import LoadingSpinner from '../components/LoadingSpinner'
+import InitialLoader from '../components/InitialLoader'
 import { CheckCircle, Minus, Plus, ArrowLeft } from 'lucide-react'
 
 export default function AreaDetailsPage() {
@@ -121,11 +121,7 @@ export default function AreaDetailsPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="py-8 px-4 md:px-6">
-        <LoadingSpinner />
-      </div>
-    )
+    return <InitialLoader visible={isLoading} />
   }
 
   if (errorMessage) {

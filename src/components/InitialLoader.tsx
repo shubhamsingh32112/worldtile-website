@@ -1,15 +1,26 @@
 import { useEffect, useState } from 'react'
 
-export default function InitialLoader() {
-  const [visible, setVisible] = useState(true)
+interface InitialLoaderProps {
+  visible?: boolean
+}
+
+export default function InitialLoader({ visible: controlledVisible }: InitialLoaderProps = {}) {
+  const [internalVisible, setInternalVisible] = useState(true)
   const [opacity, setOpacity] = useState(100)
 
+  // If visible prop is provided, use controlled mode; otherwise use auto-hide mode
+  const isControlled = controlledVisible !== undefined
+  const visible = isControlled ? controlledVisible : internalVisible
+
   useEffect(() => {
+    // Only use auto-hide logic if not controlled
+    if (isControlled) return
+
     const onLoad = () => {
       // match animation duration (2.2s) + small buffer for fade-out
       setTimeout(() => {
         setOpacity(0)
-        setTimeout(() => setVisible(false), 300) // fade-out duration
+        setTimeout(() => setInternalVisible(false), 300) // fade-out duration
       },3000)
     }
 
@@ -20,7 +31,14 @@ export default function InitialLoader() {
     }
 
     return () => window.removeEventListener('load', onLoad)
-  }, [])
+  }, [isControlled])
+
+  // Reset opacity when visibility changes in controlled mode
+  useEffect(() => {
+    if (isControlled && controlledVisible) {
+      setOpacity(100)
+    }
+  }, [isControlled, controlledVisible])
 
   if (!visible) return null
 

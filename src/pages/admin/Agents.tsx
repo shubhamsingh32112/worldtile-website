@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { adminService, Agent } from '../../services/adminService'
-import LoadingSpinner from '../../components/LoadingSpinner'
+import InitialLoader from '../../components/InitialLoader'
 import ErrorState from '../../components/ErrorState'
 
 export default function Agents() {
@@ -22,11 +22,7 @@ export default function Agents() {
   })
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <LoadingSpinner />
-      </div>
-    )
+    return <InitialLoader visible={isLoading} />
   }
 
   if (error) {
