@@ -109,8 +109,8 @@ export default function EarnPage() {
   }
 
   const shareReferralCodeViaWhatsApp = (referralCode: string) => {
-    const deepLink = `https://worldtile.in?ref=${referralCode}`
-    const message = `🌟 Join WorldTile Metaverse!\n\nBuy virtual land and build your digital empire! 🏰\n\nUse my referral code: ${referralCode}\n\  use code when signing up : \n\ ${deepLink}`
+    
+    const message = `🌟 Join WorldTile Metaverse!\n\nBuy virtual land and build your digital empire! 🏰\n\nUse my referral code: ${referralCode}`
     const encodedMessage = encodeURIComponent(message)
     const whatsappUrl = `https://wa.me/?text=${encodedMessage}`
     window.open(whatsappUrl, '_blank')

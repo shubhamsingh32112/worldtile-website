@@ -14,6 +14,11 @@ export interface CreateOrderResponse {
   network?: string
   assignedSlots?: string[] // Slots assigned by backend
   expiresAt?: string | null
+  pricing?: {
+    baseAmountUSDT: string
+    discountUSDT: string
+    finalAmountUSDT: string
+  }
   message?: string
   status?: number // HTTP status code for error handling
   meta?: {
@@ -50,6 +55,16 @@ export interface Order {
   paidAt?: string
   landSlotIds: string[]
   expiresAt?: string
+  referral?: {
+    referrerId: string
+    commissionRate: number
+    commissionAmountUSDT: string
+  }
+  pricing?: {
+    baseAmountUSDT: string
+    discountUSDT: string
+    finalAmountUSDT: string
+  }
 }
 
 export interface UserOrdersResponse {
@@ -73,6 +88,11 @@ export const orderService = {
         network: string
         assignedSlots: string[]
         expiresAt: string
+        pricing?: {
+          baseAmountUSDT: string
+          discountUSDT: string
+          finalAmountUSDT: string
+        }
       }>('/orders/create', request)
       return {
         success: true,
@@ -82,6 +102,7 @@ export const orderService = {
         network: response.data.network,
         assignedSlots: response.data.assignedSlots,
         expiresAt: response.data.expiresAt ?? null,
+        pricing: response.data.pricing,
       }
     } catch (error: any) {
       const message = error.response?.data?.message || 'Failed to create order'
@@ -178,6 +199,28 @@ export const orderService = {
       }
     } catch (error: any) {
       const message = error.response?.data?.message || 'Failed to fetch order'
+      return {
+        success: false,
+        message,
+      }
+    }
+  },
+
+  /**
+   * Add referral code to an order (ONE TIME ONLY, before payment)
+   */
+  async addReferralToOrder(orderId: string, referralCode: string): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await api.post<{
+        success: boolean
+        message: string
+      }>(`/orders/${orderId}/add-referral`, { referralCode })
+      return {
+        success: true,
+        message: response.data.message || 'Referral applied successfully',
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Failed to add referral'
       return {
         success: false,
         message,

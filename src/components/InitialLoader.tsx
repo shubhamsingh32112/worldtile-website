@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { SparklesCore } from './ui/sparkles'
 
 interface InitialLoaderProps {
   visible?: boolean
@@ -44,9 +45,12 @@ export default function InitialLoader({ visible: controlledVisible }: InitialLoa
 
   return (
     <div 
-      className="fixed inset-0 z-[99999] flex items-center justify-center bg-black transition-opacity duration-300"
+      className="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-black transition-opacity duration-300"
       style={{ opacity: opacity / 100 }}
     >
+      <h1 className="text-6xl md:text-6xl lg:text-7xl font-bold text-center text-white mb-8 relative z-20">
+        WorldTile
+      </h1>
       <div className="relative w-[60%] max-w-[520px] h-[4px] overflow-hidden bg-white/10">
         <div
           className="
@@ -56,6 +60,17 @@ export default function InitialLoader({ visible: controlledVisible }: InitialLoa
             shadow-[0_0_12px_rgba(34,211,238,0.9),0_0_28px_rgba(34,211,238,0.6)]
           "
         />
+      </div>
+      <div className="w-[40rem] h-40 relative mt-8">
+        <SparklesCore
+          background="transparent"
+          minSize={0.4}
+          maxSize={1}
+          particleDensity={1200}
+          className="w-full h-full"
+          particleColor="#FFFFFF"
+        />
+        <div className="absolute inset-0 w-full h-full bg-black [mask-image:radial-gradient(350px_200px_at_top,transparent_20%,white)]"></div>
       </div>
     </div>
   )

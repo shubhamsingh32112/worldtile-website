@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import gsap from 'gsap'
+import { NoiseBackground } from '@/components/ui/noise-background'
 
 export default function HeroText() {
   useEffect(() => {
@@ -77,23 +78,23 @@ export default function HeroText() {
       </p>
 
       {/* Explore Now Button */}
-      <button
-        onClick={handleExploreClick}
-        className="
-          mt-8
-          px-8 py-4
-          rounded-full
-          bg-white/10
-          backdrop-blur
-          border border-white/20
-          text-white font-semibold
-          hover:bg-white/20
-          hover:scale-[1.03]
-          transition-all duration-300
-        "
-      >
-        Explore Now
-      </button>
+      <div className="mt-8 flex justify-center">
+        <NoiseBackground
+          containerClassName="w-fit p-2 rounded-full mx-auto"
+          gradientColors={[
+            "rgb(255, 100, 150)",
+            "rgb(100, 150, 255)",
+            "rgb(255, 200, 100)",
+          ]}
+        >
+          <button
+            onClick={handleExploreClick}
+            className="h-full w-full cursor-pointer rounded-full bg-black px-8 py-4 text-white shadow-[0px_1px_0px_0px_var(--color-neutral-950)_inset,0px_1px_0px_0px_var(--color-neutral-800)] transition-all duration-100 active:scale-98 font-semibold"
+          >
+            Explore Now &rarr;
+          </button>
+        </NoiseBackground>
+      </div>
     </div>
   )
 }
