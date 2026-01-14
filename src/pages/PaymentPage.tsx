@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { QRCodeSVG } from 'qrcode.react'
 import { orderService } from '../services/orderService'
 import { useToast } from '../context/ToastContext'
+import { useUserAccount } from '../hooks/useUserAccount'
 import GlassCard from '../components/GlassCard'
 import ErrorState from '../components/ErrorState'
-import { Copy, CheckCircle, Download, ArrowLeft } from 'lucide-react'
+import { Copy, CheckCircle, Download, ArrowLeft, Lock } from 'lucide-react'
 
 type PaymentState = 'waiting' | 'checking' | 'confirmed' | 'expired' | 'failed'
 
@@ -25,14 +27,22 @@ export default function PaymentPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const toast = useToast()
+  const queryClient = useQueryClient()
   const state = location.state as PaymentPageLocationState | null
 
   const [paymentState, setPaymentState] = useState<PaymentState>('waiting')
   const [isVerifying, setIsVerifying] = useState(false)
   const [copiedAddress, setCopiedAddress] = useState(false)
   const [timeLeft, setTimeLeft] = useState<number>(0)
+  const [orderData, setOrderData] = useState<any>(null)
+  const [referralCode, setReferralCode] = useState('')
+  const [isApplyingReferral, setIsApplyingReferral] = useState(false)
+  const [referralApplied, setReferralApplied] = useState(false)
+  
+  const { data: userAccount } = useUserAccount()
 
-  const amount = state?.amount || '0'
+  // Use orderData pricing if available, otherwise use state
+  const amount = orderData?.pricing?.finalAmountUSDT || orderData?.expectedAmountUSDT || state?.amount || '0'
   const address = state?.address || ''
   const network = state?.network || 'TRC20'
   const stateName = state?.state || ''
@@ -71,6 +81,10 @@ export default function PaymentPage() {
       try {
         const result = await orderService.getOrderById(orderId)
         if (result.success && result.order) {
+          setOrderData(result.order)
+          if (result.order.referral) {
+            setReferralApplied(true)
+          }
           if (result.order.expiresAt) {
             // Timer drift fix: always compare to actual timestamp, never trust cached values
             const expiry = new Date(result.order.expiresAt).getTime()
@@ -157,6 +171,35 @@ export default function PaymentPage() {
     // For web, we'll just copy the QR data as text
     // Full implementation would require canvas rendering
     toast.info('QR code download functionality available. Right-click the QR code and save image.')
+  }
+
+  // Check if referral is locked (user already referred OR order has referral)
+  const isReferralLocked = userAccount?.referredBy || orderData?.referral || referralApplied
+  
+  const applyReferral = async () => {
+    if (!orderId || !referralCode.trim() || isApplyingReferral || isReferralLocked) return
+
+    setIsApplyingReferral(true)
+    try {
+      const result = await orderService.addReferralToOrder(orderId, referralCode.trim())
+      if (result.success) {
+        setReferralApplied(true)
+        toast.success('Referral applied successfully!')
+        // Reload order data to get updated referral info
+        const orderResult = await orderService.getOrderById(orderId)
+        if (orderResult.success && orderResult.order) {
+          setOrderData(orderResult.order)
+        }
+        // Invalidate user account query to refresh profile page (user.referredBy was updated)
+        await queryClient.invalidateQueries({ queryKey: ['userAccount'] })
+      } else {
+        toast.error(result.message || 'Failed to apply referral')
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to apply referral')
+    } finally {
+      setIsApplyingReferral(false)
+    }
   }
 
   const verifyPayment = async () => {
@@ -285,17 +328,89 @@ export default function PaymentPage() {
           </GlassCard>
         )}
 
+        {/* Referral Card */}
+        {paymentState !== 'confirmed' && paymentState !== 'expired' && (
+          <GlassCard padding="p-4">
+            <h3 className="text-lg font-bold text-white mb-3">Referral</h3>
+            {isReferralLocked ? (
+              // Case 1: User already referred OR order has referral (Locked)
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-green-400">
+                  <CheckCircle className="w-5 h-5" />
+                  <span className="font-semibold">Referral Applied</span>
+                  <Lock className="w-4 h-4 ml-auto" />
+                </div>
+                <p className="text-sm text-gray-400">
+                  🎉 Referral discount active on this & future purchases
+                </p>
+                <p className="text-xs text-gray-500 flex items-center gap-1">
+                  <Lock className="w-3 h-3" />
+                  Locked
+                </p>
+              </div>
+            ) : (
+              // Case 2: User NOT referred (Input field)
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">Referral Code (Optional)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={referralCode}
+                      onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                      placeholder="WT-XXXXX"
+                      disabled={referralApplied || isApplyingReferral}
+                      className="flex-1 bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                    <button
+                      onClick={applyReferral}
+                      disabled={!referralCode.trim() || referralApplied || isApplyingReferral}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
+                    >
+                      {isApplyingReferral ? 'Applying...' : 'Apply'}
+                    </button>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500">
+                  Apply a referral code for discounts (one-time only)
+                </p>
+              </div>
+            )}
+          </GlassCard>
+        )}
+
         {/* Payment Details Card */}
         <GlassCard padding="p-4">
           <h3 className="text-lg font-bold text-white mb-3">Payment Details</h3>
           <div className="space-y-3">
-            {/* Amount */}
-            <div>
-              <label className="text-xs text-gray-400 mb-1 block">Total Amount</label>
-              <div className="bg-gray-800/50 rounded-lg px-3 py-2 text-white">
-                {amount} USDT ({quantity} tile{quantity > 1 ? 's' : ''})
+            {/* Pricing Breakdown */}
+            {orderData?.pricing ? (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">Tiles ({quantity} × $110):</span>
+                  <span className="text-white">${parseFloat(orderData.pricing.baseAmountUSDT).toFixed(2)}</span>
+                </div>
+                {parseFloat(orderData.pricing.discountUSDT) > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-400">Referral Discount:</span>
+                    <span className="text-green-400">-${parseFloat(orderData.pricing.discountUSDT).toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="border-t border-gray-700 pt-2 mt-2">
+                  <div className="flex justify-between text-base font-bold">
+                    <span className="text-gray-300">Total Payable:</span>
+                    <span className="text-white">{orderData.pricing.finalAmountUSDT} USDT</span>
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Total Amount</label>
+                <div className="bg-gray-800/50 rounded-lg px-3 py-2 text-white">
+                  {amount} USDT ({quantity} tile{quantity > 1 ? 's' : ''})
+                </div>
+              </div>
+            )}
 
             {/* Network */}
             <div>

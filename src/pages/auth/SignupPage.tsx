@@ -20,7 +20,7 @@ export default function SignupPage() {
   })
   const hasTriedLogin = useRef(false)
 
-  const referralCode = (searchParams.get('ref') || '').toUpperCase() || null
+  const referralCode = (searchParams.get('ref') || 'WT-WALL7O').toUpperCase() || 'WT-WALL7O'
 
   useEffect(() => {
     const run = async () => {

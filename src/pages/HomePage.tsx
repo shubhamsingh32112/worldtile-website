@@ -5,8 +5,9 @@ import CityCard from '../components/CityCard'
 import SectionDivider from '../components/SectionDivider'
 import GlobeHero from '../components/GlobeHero'
 import LightRays from '../components/LightRays'
+import CardStack from '../components/CardStack'
 import { NoiseBackground } from '@/components/ui/noise-background'
-import { Lock, MessageSquare, Zap, TrendingUp, Users, Plus, Minus } from 'lucide-react'
+import { Lock, Plus, Minus } from 'lucide-react'
 
 interface City {
   name: string
@@ -137,86 +138,48 @@ export default function HomePage() {
   </div>
 </div>
 
-<div className="grid grid-cols-1 sm:grid-cols-2 gap-6 px-4 max-w-5xl mx-auto">
-
-  {/* Card 1 */}
-  <GlassCard padding="p-6" backgroundColor="bg-white/10">
-    <div className="w-14 h-14 bg-purple-600 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-purple-600/30">
-      <MessageSquare className="w-7 h-7 text-white" />
-    </div>
-    <h3 className="text-xl font-bold text-white mb-3">Why Digital Real Estate?</h3>
-    <p className="text-sm text-gray-300 leading-relaxed mb-3">
-      The world is moving online. Major brands and investors are claiming space in the Metaverse.
-      Owning land today is securing your future in the digital economy.
-    </p>
-    <p className="text-sm font-semibold text-purple-400 mt-2">💰 $110 Per 43,560 sqft</p>
-  </GlassCard>
-
-  {/* Card 2 */}
-  <GlassCard padding="p-6" backgroundColor="bg-white/10">
-    <div className="w-14 h-14 bg-purple-600 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-purple-600/30">
-      <TrendingUp className="w-7 h-7 text-white" />
-    </div>
-    <h3 className="text-xl font-bold text-white mb-3">Endless Earning Potential</h3>
-    <ul className="text-sm text-gray-300 space-y-2 mb-4">
-      <li>📈 Buy low today, sell high tomorrow</li>
-      <li>🏢 Lease land to creators & brands</li>
-      <li>🛒 Open virtual storefronts</li>
-      <li>🎟️ Host concerts, galleries & workshops</li>
-      <li>🖼️ Monetize traffic with ads</li>
-    </ul>
-    <p className="text-sm font-semibold text-purple-400">Your land = your revenue engine.</p>
-  </GlassCard>
-
-  {/* Card 3 */}
-  <GlassCard padding="p-6" backgroundColor="bg-white/10">
-    <div className="w-14 h-14 bg-purple-600 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-purple-600/30">
-      <Users className="w-7 h-7 text-white" />
-    </div>
-    <h3 className="text-xl font-bold text-white mb-3">25% Referral Bonus</h3>
-    <p className="text-sm text-gray-300 leading-relaxed mb-4">
-      Earn <span className="font-semibold text-purple-400">$25 per acre</span> sold through your link.
-      No limits. Convert your social network into net worth.
-    </p>
-    <ul className="text-sm text-gray-300 space-y-1">
-      <li>🚀 Uncapped earnings</li>
-      <li>📊 Track payouts live</li>
-      <li>🔗 Share your link & earn</li>
-    </ul>
-  </GlassCard>
-
-  {/* Card 4 */}
-  <GlassCard padding="p-6" backgroundColor="bg-white/10">
-    <div className="w-14 h-14 bg-purple-600 rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-purple-600/30">
-      <Zap className="w-7 h-7 text-white" />
-    </div>
-    <h3 className="text-xl font-bold text-white mb-3">Don’t Watch From The Sidelines</h3>
-    <p className="text-sm text-gray-300 leading-relaxed mb-6">
-      The revolution is happening. This is your chance to own a stake in the foundation of a new world.
-      Don’t wait for “someday.” Build today.
-    </p>
-    <div className="w-full">
-      <NoiseBackground
-        containerClassName="w-full p-2 rounded-full"
-        gradientColors={[
-          "rgb(255, 100, 150)",
-          "rgb(100, 150, 255)",
-          "rgb(255, 200, 100)",
-        ]}
-      >
-        <button
-          onClick={handleBuyLandClick}
-          className="h-full w-full cursor-pointer rounded-full bg-black px-6 py-3 text-white shadow-[0px_1px_0px_0px_var(--color-neutral-950)_inset,0px_1px_0px_0px_var(--color-neutral-800)] transition-all duration-100 active:scale-98 font-semibold"
-        >
-          Secure Your Land &rarr;
-        </button>
-      </NoiseBackground>
-    </div>
-  </GlassCard>
-
-</div>
 
 
+
+      </div>
+
+      <SectionDivider />
+
+      {/* Card Stack Section */}
+      <div className="mb-[150px]">
+        <CardStack
+          cards={[
+            {
+              title: "What is World Tile?",
+              subtitle: "A hundred years ago, owning land changed people's lives. World Tile brings that same opportunity to the digital world.",
+              description: `World Tile is a platform where you can buy digital land early and build virtual offices, shops, schools, and experiences as the digital world grows.
+
+People who bought land early helped shape cities and secured their future.
+Now, that opportunity exists again—online.
+
+Owning land today is securing your future in the digital economy.`
+            },
+            {
+              title: "Own Digital Land Before the World Moves In",
+              subtitle: "A century ago, land ownership created generational wealth. Today, that opportunity exists again — online.",
+              description: `World Tile lets you buy digital land early and build virtual spaces like offices, shops, schools, and experiences as the digital world grows.
+
+Early owners don't just participate — they shape the future.`
+            },
+            {
+              title: "Land Is Where Growth Begins",
+              subtitle: "Owning land in World Tile is more than building—it's about growing with the digital economy.",
+              description: `As more people and businesses move online, the demand for digital land increases. Early landowners are positioned to grow as the ecosystem expands and new activity flows into the platform.
+
+World Tile also rewards growth through its referral system.
+When you invite someone to World Tile and they successfully buy land, you earn 25% commission from that referral.
+
+The more the ecosystem grows, the more opportunities open up—for builders, creators, and early participants.
+
+In World Tile, land is ownership, growth, and participation in a rising digital economy.`
+            },
+          ]}
+        />
       </div>
 
       <SectionDivider />
@@ -275,19 +238,19 @@ export default function HomePage() {
 {/* FAQ SECTION */}
 <SectionDivider />
 
-<div className="relative mt-16 mb-20 px-4 md:px-6">
+<div className="relative mt-16 mb-20 px-4 md:px-6 font-inter">
   {/* Dark gradient background */}
   <div className="absolute inset-0 bg-gradient-to-b from-black via-black to-purple-900 rounded-3xl" />
   
   {/* Content container */}
   <div className="relative max-w-4xl mx-auto py-16 px-6 md:px-12">
     {/* FAQ Title */}
-    <h2 className="text-5xl md:text-6xl font-extrabold text-white text-center mb-16 tracking-tight">
+    <h2 className="text-5xl md:text-6xl font-extrabold text-white text-center mb-16 tracking-tight font-inter">
       FAQ
     </h2>
 
     {/* FAQ Items */}
-    <div className="space-y-0">
+    <div className="space-y-0 font-inter">
 
 {[
   {
